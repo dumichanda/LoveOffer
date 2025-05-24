@@ -10,11 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { useAppStore } from "@/lib/store"
+
+interface EmergencyContact {
+  id: string
+  name: string
+  phone: string
+  relationship: string
+  isPrimary: boolean
+}
 
 export function SafetyCenter() {
-  const { currentUser, addEmergencyContact, removeEmergencyContact, updateUserProfile, createSafetyCheckIn } =
-    useAppStore()
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([])
   const [showAddContact, setShowAddContact] = useState(false)
   const [newContact, setNewContact] = useState({
     name: "",
@@ -22,22 +28,33 @@ export function SafetyCenter() {
     relationship: "",
     isPrimary: false,
   })
+  const [safetySettings, setSafetySettings] = useState({
+    checkInEnabled: false,
+    shareLocationEnabled: false,
+    safetyTips: true,
+  })
 
   const handleAddContact = () => {
     if (newContact.name && newContact.phone && newContact.relationship) {
-      addEmergencyContact(newContact)
+      const contact: EmergencyContact = {
+        id: `contact_${Date.now()}`,
+        ...newContact,
+      }
+      setEmergencyContacts((prev) => [...prev, contact])
       setNewContact({ name: "", phone: "", relationship: "", isPrimary: false })
       setShowAddContact(false)
     }
   }
 
+  const handleRemoveContact = (contactId: string) => {
+    setEmergencyContacts((prev) => prev.filter((contact) => contact.id !== contactId))
+  }
+
   const handleSafetySettingChange = (key: string, value: boolean) => {
-    updateUserProfile({
-      safety: {
-        ...currentUser?.safety,
-        [key]: value,
-      },
-    })
+    setSafetySettings((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
   }
 
   const safetyTips = [
@@ -73,6 +90,9 @@ export function SafetyCenter() {
     },
   ]
 
+  // Calculate safety score based on settings and contacts
+  const safetyScore = emergencyContacts.length > 0 ? (emergencyContacts.length >= 2 ? 95 : 85) : 75
+
   return (
     <div className="space-y-6">
       {/* Safety Overview */}
@@ -86,15 +106,11 @@ export function SafetyCenter() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {currentUser?.verification.level === "premium" ? "95%" : "75%"}
-              </div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{safetyScore}%</div>
               <div className="text-sm text-green-700 dark:text-green-300">Safety Score</div>
             </div>
             <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {currentUser?.safety.emergencyContacts.length || 0}
-              </div>
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{emergencyContacts.length}</div>
               <div className="text-sm text-blue-700 dark:text-blue-300">Emergency Contacts</div>
             </div>
           </div>
@@ -116,9 +132,9 @@ export function SafetyCenter() {
           </div>
         </CardHeader>
         <CardContent>
-          {currentUser?.safety.emergencyContacts.length ? (
+          {emergencyContacts.length > 0 ? (
             <div className="space-y-3">
-              {currentUser.safety.emergencyContacts.map((contact) => (
+              {emergencyContacts.map((contact) => (
                 <div
                   key={contact.id}
                   className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg"
@@ -135,7 +151,7 @@ export function SafetyCenter() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeEmergencyContact(contact.id)}
+                    onClick={() => handleRemoveContact(contact.id)}
                     className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     <X className="w-4 h-4" />
@@ -170,7 +186,7 @@ export function SafetyCenter() {
               </p>
             </div>
             <Switch
-              checked={currentUser?.safety.checkInEnabled}
+              checked={safetySettings.checkInEnabled}
               onCheckedChange={(checked) => handleSafetySettingChange("checkInEnabled", checked)}
             />
           </div>
@@ -183,7 +199,7 @@ export function SafetyCenter() {
               </p>
             </div>
             <Switch
-              checked={currentUser?.safety.shareLocationEnabled}
+              checked={safetySettings.shareLocationEnabled}
               onCheckedChange={(checked) => handleSafetySettingChange("shareLocationEnabled", checked)}
             />
           </div>
@@ -194,7 +210,7 @@ export function SafetyCenter() {
               <p className="text-xs text-gray-500 dark:text-gray-400">Show safety tips and reminders</p>
             </div>
             <Switch
-              checked={currentUser?.safety.safetyTips}
+              checked={safetySettings.safetyTips}
               onCheckedChange={(checked) => handleSafetySettingChange("safetyTips", checked)}
             />
           </div>
