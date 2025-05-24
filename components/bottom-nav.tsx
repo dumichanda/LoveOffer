@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Search, MessageCircle, Calendar, User } from "lucide-react"
+import { Home, Plus, MessageCircle, Calendar, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ThemeToggle } from "./theme-toggle"
@@ -10,7 +10,7 @@ const BottomNav = () => {
 
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
-    { href: "/search", icon: Search, label: "Search" },
+    { href: "/create", icon: Plus, label: "Create" },
     { href: "/chats", icon: MessageCircle, label: "Chats" },
     { href: "/calendar", icon: Calendar, label: "Calendar" },
     { href: "/profile", icon: User, label: "Profile" },
