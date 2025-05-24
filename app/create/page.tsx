@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { ArrowLeft, Bell, Plus, ImageIcon } from "lucide-react"
+import { Bell, Plus, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -146,12 +146,8 @@ export default function CreateOfferPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.back()}>
-            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Create New Offer</h1>
-        </div>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Create New Offer</h1>
+
         <div className="flex items-center gap-2">
           <div className="relative">
             <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
