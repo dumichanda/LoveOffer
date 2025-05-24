@@ -1,43 +1,44 @@
 "use client"
+
+import { Home, Search, MessageCircle, Calendar, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Calendar, Plus, MessageCircle, User, Settings } from "lucide-react"
+import { ThemeToggle } from "./theme-toggle"
 
 const BottomNav = () => {
   const pathname = usePathname()
 
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
-    { href: "/calendar", icon: Calendar, label: "Calendar" },
-    { href: "/create", icon: Plus, label: "Create" },
+    { href: "/search", icon: Search, label: "Search" },
     { href: "/chats", icon: MessageCircle, label: "Chats" },
+    { href: "/calendar", icon: Calendar, label: "Calendar" },
     { href: "/profile", icon: User, label: "Profile" },
-    { href: "/admin", icon: Settings, label: "Admin" },
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 z-50">
-      <ul className="flex justify-around">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href
-          const Icon = item.icon
+    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-50">
+      <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
+        {navItems.map(({ href, icon: Icon, label }) => {
+          const isActive = pathname === href
           return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                  isActive
-                    ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
-              >
-                <Icon className="h-6 w-6" />
-                <span className="text-xs">{item.label}</span>
-              </Link>
-            </li>
+            <Link
+              key={href}
+              href={href}
+              className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
+                isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-xs mt-1">{label}</span>
+            </Link>
           )
         })}
-      </ul>
+        <div className="flex flex-col items-center p-2">
+          <ThemeToggle />
+          <span className="text-xs mt-1 text-muted-foreground">Theme</span>
+        </div>
+      </div>
     </nav>
   )
 }

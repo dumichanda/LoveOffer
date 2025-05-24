@@ -1,335 +1,254 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Heart, X, Bell, Bookmark, Eye, Search } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Heart, MapPin, Star, Calendar, Users, AlertCircle } from "lucide-react"
+import Link from "next/link"
 import BottomNav from "@/components/bottom-nav"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { SearchFilters } from "@/components/search-filters"
-import { formatDateTime } from "@/lib/utils"
-import { useRouter } from "next/navigation"
-import { useAppStore } from "@/lib/store"
-import { NotificationCenter } from "@/components/notification-center"
+import { LoadingSkeleton } from "@/components/loading-skeleton"
+import { getTimeAgo } from "@/lib/utils"
+
+// Mock data for demonstration
+const mockOffers = [
+  {
+    id: "1",
+    title: "Sunset Picnic at Table Mountain",
+    description: "Romantic picnic with stunning city views",
+    price: 450,
+    location: "Cape Town",
+    rating: 4.8,
+    reviewCount: 24,
+    imageUrl: "/placeholder.svg?height=200&width=300&query=sunset+picnic+table+mountain",
+    host: {
+      name: "Sarah",
+      avatar: "/placeholder.svg?height=40&width=40&query=woman+profile",
+    },
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: "2",
+    title: "Wine Tasting in Stellenbosch",
+    description: "Private wine tasting experience",
+    price: 680,
+    location: "Stellenbosch",
+    rating: 4.9,
+    reviewCount: 18,
+    imageUrl: "/placeholder.svg?height=200&width=300&query=wine+tasting+stellenbosch",
+    host: {
+      name: "Michael",
+      avatar: "/placeholder.svg?height=40&width=40&query=man+profile",
+    },
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+  },
+]
 
 export default function HomePage() {
-  const router = useRouter()
-  const [showNotifications, setShowNotifications] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
-  const [currentOfferIndex, setCurrentOfferIndex] = useState(0)
+  const { data: session, status } = useSession()
+  const [offers, setOffers] = useState(mockOffers)
+  const [authError, setAuthError] = useState(false)
 
-  const {
-    offers,
-    favoriteOffers,
-    likeOffer,
-    passOffer,
-    toggleFavorite,
-    incrementOfferViews,
-    currentUser,
-    chats,
-    notifications,
-    getFavoriteOffers,
-  } = useAppStore()
-
-  const filteredOffers = offers
-  const unreadChats = chats.filter((chat) => chat.unreadCount > 0).length
-  const unreadNotifications = notifications.filter((notif) => !notif.read).length
-
-  useEffect(() => {}, [])
-
-  const currentOffer = filteredOffers[currentOfferIndex]
-
-  const handleSwipe = (action: "like" | "pass") => {
-    if (!currentOffer) return
-
-    if (action === "like") {
-      likeOffer(currentOffer.id)
-    } else {
-      passOffer(currentOffer.id)
-    }
-
-    // Move to next offer or loop back
-    if (currentOfferIndex >= filteredOffers.length - 1) {
-      setCurrentOfferIndex(0)
-    } else {
-      setCurrentOfferIndex((prev) => prev + 1)
-    }
-  }
-
-  const handleViewOffer = () => {
-    if (currentOffer) {
-      incrementOfferViews(currentOffer.id)
-      router.push(`/offers/${currentOffer.id}`)
-    }
-  }
-
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (currentOffer) {
-      const success = toggleFavorite(currentOffer.id)
-      if (!success) {
-        alert("You can only favorite up to 10 offers. Remove some favorites to add new ones.")
+  useEffect(() => {
+    // Check if there's an auth error
+    if (status === "unauthenticated") {
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.get("error")) {
+        setAuthError(true)
       }
     }
+  }, [status])
+
+  if (status === "loading") {
+    return <LoadingSkeleton />
   }
 
-  // No offers state
-  if (!currentOffer) {
+  // Show error state if auth is broken
+  if (authError) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Datecraft</h1>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setShowSearch(!showSearch)}>
-              <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <AlertCircle className="mx-auto h-12 w-12 text-yellow-500 mb-4" />
+            <CardTitle className="text-xl">Authentication Issue</CardTitle>
+            <CardDescription>
+              We're experiencing some technical difficulties. You can still browse offers without signing in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={() => {
+                setAuthError(false)
+                window.location.href = "/"
+              }}
+              className="w-full"
+            >
+              Continue Browsing
             </Button>
-            <ThemeToggle />
-            <div className="relative">
-              <Button variant="ghost" size="sm" onClick={() => setShowNotifications(true)}>
-                <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                {unreadChats + unreadNotifications > 0 && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs text-white font-bold">{unreadChats + unreadNotifications}</span>
-                  </div>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {showSearch && (
-          <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <SearchFilters />
-          </div>
-        )}
-
-        <div className="p-4 flex-1 flex items-center justify-center">
-          <Card className="w-full max-w-sm p-8 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">No offers found!</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Try adjusting your filters or check back later for new experiences!
-            </p>
-            <div className="space-y-2">
-              <Button onClick={() => router.push("/create")} className="w-full bg-red-500 hover:bg-red-600 text-white">
-                Create Your Own Offer
-              </Button>
-              <Button variant="outline" onClick={() => setShowSearch(true)} className="w-full">
-                Adjust Filters
-              </Button>
-            </div>
-          </Card>
-        </div>
-
-        <NotificationCenter isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
-        <BottomNav />
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  const nextSlot = currentOffer.availableSlots.find((slot) => !slot.isBooked)
-  const isFavorited = favoriteOffers.includes(currentOffer.id)
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Datecraft</h1>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => setShowSearch(!showSearch)}>
-            <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          </Button>
-          <ThemeToggle />
-          <div className="relative">
-            <Button variant="ghost" size="sm" onClick={() => setShowNotifications(true)}>
-              <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              {unreadChats + unreadNotifications > 0 && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs text-white font-bold">{unreadChats + unreadNotifications}</span>
-                </div>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Panel */}
-      {showSearch && (
-        <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <SearchFilters />
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="p-3">
-        <Card
-          className="relative overflow-hidden w-full cursor-pointer bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-          onClick={handleViewOffer}
-        >
-          {/* Image */}
-          <div
-            className="h-[500px] bg-cover bg-center relative"
-            style={{ backgroundImage: `url(${currentOffer.images[0] || "/placeholder.svg?height=500&width=400"})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-            {/* Top Badges */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-              <div className="flex flex-col gap-2">
-                <Badge className="bg-purple-500 text-white text-sm px-2 py-1 w-fit">{currentOffer.category}</Badge>
-                {currentOffer.host.isVerified && (
-                  <Badge className="bg-green-500 text-white text-sm px-2 py-1 w-fit">✓ Verified Host</Badge>
-                )}
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+              Mavuso
+            </CardTitle>
+            <CardDescription className="text-lg">Discover unique dating experiences in South Africa</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="space-y-2">
+                <Heart className="mx-auto h-8 w-8 text-pink-500" />
+                <p className="text-sm font-medium">Unique Dates</p>
               </div>
-              <div className="flex flex-col gap-2 items-end">
-                <Badge className="bg-red-500 text-white text-lg px-3 py-1">R{currentOffer.price}</Badge>
-                <Badge className="bg-green-500 text-white text-sm px-2 py-1">{currentOffer.status}</Badge>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={handleToggleFavorite}
-                  className={`w-12 h-12 rounded-full backdrop-blur-sm transition-all duration-200 ${
-                    isFavorited ? "bg-yellow-400/90 hover:bg-yellow-500/90 shadow-lg" : "bg-white/20 hover:bg-white/30"
-                  }`}
-                >
-                  <Bookmark
-                    className={`w-6 h-6 transition-all duration-200 ${
-                      isFavorited ? "fill-white text-white" : "text-white"
-                    }`}
-                  />
-                </Button>
-                {isFavorited && (
-                  <div className="bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold">Favorited</div>
-                )}
+              <div className="space-y-2">
+                <Users className="mx-auto h-8 w-8 text-purple-500" />
+                <p className="text-sm font-medium">Local Hosts</p>
               </div>
             </div>
-
-            {/* Content Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-2xl font-bold">{currentOffer.title}</h2>
-                {currentOffer.reviewCount > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-yellow-400">⭐</span>
-                    <span className="text-base font-bold">{currentOffer.rating}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 mb-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="text-sm">{currentOffer.host.initials}</AvatarFallback>
-                </Avatar>
-                <span className="text-base">by {currentOffer.host.name}</span>
-                {currentOffer.host.isVerified && (
-                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-base">📍 {currentOffer.location}</span>
-              </div>
-
-              {/* Booking Statistics */}
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <div className="bg-green-500/80 backdrop-blur-sm rounded-lg p-2 text-center">
-                  <div className="text-white text-lg font-bold">
-                    ✓ {currentOffer.bookingStats?.confirmedBookings || 10}
-                  </div>
-                  <div className="text-white text-xs">Confirmed</div>
-                </div>
-                <div className="bg-red-500/80 backdrop-blur-sm rounded-lg p-2 text-center">
-                  <div className="text-white text-lg font-bold">
-                    ⚠ {currentOffer.bookingStats?.canceledBookings || 2}
-                  </div>
-                  <div className="text-white text-xs">Canceled</div>
-                </div>
-                <div className="bg-blue-500/80 backdrop-blur-sm rounded-lg p-2 text-center">
-                  <div className="text-white text-lg font-bold">📊 83%</div>
-                  <div className="text-white text-xs">Success</div>
-                </div>
-              </div>
-
-              {/* Host History */}
-              <div className="bg-black/30 backdrop-blur-sm rounded-lg p-2 mb-3">
-                <div className="text-white/80 text-xs mb-1">Host History:</div>
-                <div className="flex items-center justify-between">
-                  <span className="text-green-400 text-sm">
-                    ✓ {currentOffer.host.bookingHistory?.totalConfirmed || 42} confirmed
-                  </span>
-                  <span className="text-red-400 text-sm">
-                    📉 {currentOffer.host.bookingHistory?.cancelationRate || 6.7}% cancel rate
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 mb-3 text-sm">
-                <div className="flex items-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  <span>{currentOffer.views} views</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Heart className="w-4 h-4" />
-                  <span>{currentOffer.likes} likes</span>
-                </div>
-                <div>
-                  <span>
-                    Max {currentOffer.maxGuests} guest{currentOffer.maxGuests > 1 ? "s" : ""}
-                  </span>
-                </div>
-              </div>
-
-              {nextSlot && (
-                <div className="flex items-center gap-2 text-base mb-3">
-                  <span>🕐 Next: {formatDateTime(nextSlot.date, nextSlot.startTime, nextSlot.endTime)}</span>
-                </div>
-              )}
-
-              <p className="text-white/90 text-sm mb-4">{currentOffer.description}</p>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1">
-                {currentOffer.tags.slice(0, 3).map((tag) => (
-                  <Badge key={tag} variant="secondary" className="bg-white/20 text-white text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+            <div className="space-y-2">
+              <Button asChild className="w-full" size="lg">
+                <Link href="/auth/signin">Sign In with Google</Link>
+              </Button>
+              <Button variant="outline" onClick={() => setAuthError(false)} className="w-full">
+                Browse Without Account
+              </Button>
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="p-6 flex justify-center gap-8 bg-white dark:bg-gray-800">
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-20 h-20 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleSwipe("pass")
-              }}
-            >
-              <X className="w-8 h-8 text-gray-600 dark:text-gray-300" />
-            </Button>
-            <Button
-              size="lg"
-              className="w-20 h-20 rounded-full bg-red-500 hover:bg-red-600"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleSwipe("like")
-              }}
-            >
-              <Heart className="w-8 h-8 fill-white" />
-            </Button>
-          </div>
+          </CardContent>
         </Card>
       </div>
+    )
+  }
 
-      <NotificationCenter isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+              Mavuso
+            </h1>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">Welcome, {session?.user?.name?.split(" ")[0]}</span>
+              <img
+                src={session?.user?.image || "/placeholder.svg?height=32&width=32&query=user+avatar"}
+                alt="Profile"
+                className="h-8 w-8 rounded-full"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Hero Section */}
+        <section className="text-center space-y-4">
+          <h2 className="text-3xl font-bold">Discover Amazing Date Ideas</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            From romantic picnics to adventure activities, find unique experiences hosted by locals in your city.
+          </p>
+        </section>
+
+        {/* Quick Stats */}
+        <section className="grid grid-cols-3 gap-4">
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <Calendar className="mx-auto h-8 w-8 text-pink-500 mb-2" />
+              <p className="text-2xl font-bold">150+</p>
+              <p className="text-sm text-muted-foreground">Experiences</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <Users className="mx-auto h-8 w-8 text-purple-500 mb-2" />
+              <p className="text-2xl font-bold">500+</p>
+              <p className="text-sm text-muted-foreground">Happy Couples</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <Star className="mx-auto h-8 w-8 text-yellow-500 mb-2" />
+              <p className="text-2xl font-bold">4.8</p>
+              <p className="text-sm text-muted-foreground">Avg Rating</p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Featured Offers */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold">Featured Experiences</h3>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/offers">View All</Link>
+            </Button>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {offers.map((offer) => (
+              <Card key={offer.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="aspect-video relative">
+                  <img
+                    src={offer.imageUrl || "/placeholder.svg"}
+                    alt={offer.title}
+                    className="object-cover w-full h-full"
+                  />
+                  <Badge className="absolute top-2 right-2 bg-white/90 text-black">R{offer.price}</Badge>
+                </div>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold line-clamp-1">{offer.title}</h4>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{offer.description}</p>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      <span>{offer.location}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{offer.rating}</span>
+                        <span className="text-sm text-muted-foreground">({offer.reviewCount})</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{getTimeAgo(offer.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 pt-2">
+                      <img
+                        src={offer.host.avatar || "/placeholder.svg"}
+                        alt={offer.host.name}
+                        className="h-6 w-6 rounded-full"
+                      />
+                      <span className="text-sm text-muted-foreground">Hosted by {offer.host.name}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="text-center space-y-4 py-8">
+          <h3 className="text-2xl font-bold">Ready to Create Your Own Experience?</h3>
+          <p className="text-muted-foreground">
+            Share your unique date idea and earn money while helping couples create memories.
+          </p>
+          <Button size="lg" asChild>
+            <Link href="/create">
+              <Heart className="mr-2 h-4 w-4" />
+              Create Experience
+            </Link>
+          </Button>
+        </section>
+      </main>
+
       <BottomNav />
     </div>
   )

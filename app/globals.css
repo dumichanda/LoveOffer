@@ -67,3 +67,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom dark mode enhancements */
+@layer components {
+  .dark-card {
+    @apply bg-card border-border shadow-lg;
+  }
+
+  .dark-input {
+    @apply bg-input border-border text-foreground placeholder:text-muted-foreground;
+  }
+
+  .dark-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+
+  .dark-nav {
+    @apply bg-card/80 backdrop-blur-sm border-border;
+  }
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}

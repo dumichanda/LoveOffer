@@ -1,15 +1,35 @@
 "use client"
 
 import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { useThemeStore } from "@/lib/theme-store"
+import { useEffect, useState } from "react"
 
 export function ThemeToggle() {
-  const { isDarkMode, toggleDarkMode } = useThemeStore()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="sm" className="w-9 h-9 rounded-full">
+        <div className="w-5 h-5" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+    )
+  }
 
   return (
-    <Button variant="ghost" size="sm" onClick={toggleDarkMode} className="w-9 h-9 rounded-full">
-      {isDarkMode ? (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    >
+      {theme === "dark" ? (
         <Sun className="w-5 h-5 text-yellow-500" />
       ) : (
         <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
