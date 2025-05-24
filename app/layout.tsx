@@ -4,14 +4,14 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
-import { SocketProvider } from "@/lib/socket-context"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Mavuso - Unique Dating Experiences",
-  description: "Create and book unique dating experiences in your city",
-  generator: "v0.dev",
+  description: "Discover unique dating experiences in South Africa",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -22,13 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <SocketProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <main className="pb-16 bg-background text-foreground min-h-screen transition-colors">{children}</main>
-            </ThemeProvider>
-          </SocketProvider>
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

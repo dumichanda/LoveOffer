@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { createContext, useContext } from "react"
+import { createContext, useContext, type ReactNode } from "react"
 
 interface SocketContextType {
   socket: null
@@ -14,14 +12,8 @@ const SocketContext = createContext<SocketContextType>({
   isConnected: false,
 })
 
-export function SocketProvider({ children }: { children: React.ReactNode }) {
+export function SocketProvider({ children }: { children: ReactNode }) {
   return <SocketContext.Provider value={{ socket: null, isConnected: false }}>{children}</SocketContext.Provider>
 }
 
-export const useSocket = () => {
-  const context = useContext(SocketContext)
-  if (!context) {
-    throw new Error("useSocket must be used within a SocketProvider")
-  }
-  return context
-}
+export const useSocket = () => useContext(SocketContext)
