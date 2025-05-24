@@ -2,53 +2,26 @@
 
 import type React from "react"
 
-import { createContext, useContext, useState } from "react"
-import { useSession } from "next-auth/react"
+import { createContext, useContext } from "react"
 
 interface SocketContextType {
+  socket: null
   isConnected: boolean
-  sendMessage: (chatId: string, message: string) => void
-  joinChat: (chatId: string) => void
-  leaveChat: (chatId: string) => void
 }
 
 const SocketContext = createContext<SocketContextType>({
+  socket: null,
   isConnected: false,
-  sendMessage: () => {},
-  joinChat: () => {},
-  leaveChat: () => {},
 })
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const [isConnected, setIsConnected] = useState(false)
-  const { data: session } = useSession()
-
-  // Simplified socket provider without actual Socket.IO for now
-  const sendMessage = (chatId: string, message: string) => {
-    console.log("Sending message:", { chatId, message })
-    // This will be implemented with actual Socket.IO later
-  }
-
-  const joinChat = (chatId: string) => {
-    console.log("Joining chat:", chatId)
-  }
-
-  const leaveChat = (chatId: string) => {
-    console.log("Leaving chat:", chatId)
-  }
-
-  return (
-    <SocketContext.Provider
-      value={{
-        isConnected,
-        sendMessage,
-        joinChat,
-        leaveChat,
-      }}
-    >
-      {children}
-    </SocketContext.Provider>
-  )
+  return <SocketContext.Provider value={{ socket: null, isConnected: false }}>{children}</SocketContext.Provider>
 }
 
-export const useSocket = () => useContext(SocketContext)
+export const useSocket = () => {
+  const context = useContext(SocketContext)
+  if (!context) {
+    throw new Error("useSocket must be used within a SocketProvider")
+  }
+  return context
+}

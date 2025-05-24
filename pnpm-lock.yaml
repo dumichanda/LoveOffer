@@ -119,9 +119,6 @@ importers:
       http:
         specifier: latest
         version: 0.0.1-security
-      immer:
-        specifier: latest
-        version: 10.1.1
       input-otp:
         specifier: 1.4.1
         version: 1.4.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -173,18 +170,12 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
-      use-sync-external-store:
-        specifier: latest
-        version: 1.5.0(react@19.0.0)
       vaul:
         specifier: ^0.9.6
         version: 0.9.6(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       zod:
         specifier: latest
         version: 3.25.28
-      zustand:
-        specifier: latest
-        version: 5.0.5(@types/react@19.0.0)(immer@10.1.1)(react@19.0.0)(use-sync-external-store@1.5.0(react@19.0.0))
     devDependencies:
       '@types/node':
         specifier: ^22
@@ -1487,9 +1478,6 @@ packages:
   http@0.0.1-security:
     resolution: {integrity: sha512-RnDvP10Ty9FxqOtPZuxtebw1j4L/WiqNMDtuc1YMH1XQm5TgDRaR1G9u8upL6KD1bXHSp9eSXo/ED+8Q7FAr+g==}
 
-  immer@10.1.1:
-    resolution: {integrity: sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==}
-
   input-otp@1.4.1:
     resolution: {integrity: sha512-+yvpmKYKHi9jIGngxagY9oWiiblPB7+nEO75F2l2o4vs+6vpPZZmUl4tBNYuTCvQjhvEIbdNeJu70bhfYP2nbw==}
     peerDependencies:
@@ -2144,24 +2132,6 @@ packages:
 
   zod@3.25.28:
     resolution: {integrity: sha512-/nt/67WYKnr5by3YS7LroZJbtcCBurDKKPBPWWzaxvVCGuG/NOsiKkrjoOhI8mJ+SQUXEbUzeB3S+6XDUEEj7Q==}
-
-  zustand@5.0.5:
-    resolution: {integrity: sha512-mILtRfKW9xM47hqxGIxCv12gXusoY/xTSHBYApXozR0HmQv299whhBeeAcRy+KrPPybzosvJBCOmVjq6x12fCg==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      '@types/react': '>=18.0.0'
-      immer: '>=9.0.6'
-      react: '>=18.0.0'
-      use-sync-external-store: '>=1.2.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      immer:
-        optional: true
-      react:
-        optional: true
-      use-sync-external-store:
-        optional: true
 
 snapshots:
 
@@ -3414,8 +3384,6 @@ snapshots:
 
   http@0.0.1-security: {}
 
-  immer@10.1.1: {}
-
   input-otp@1.4.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
@@ -4062,10 +4030,3 @@ snapshots:
   yaml@2.8.0: {}
 
   zod@3.25.28: {}
-
-  zustand@5.0.5(@types/react@19.0.0)(immer@10.1.1)(react@19.0.0)(use-sync-external-store@1.5.0(react@19.0.0)):
-    optionalDependencies:
-      '@types/react': 19.0.0
-      immer: 10.1.1
-      react: 19.0.0
-      use-sync-external-store: 1.5.0(react@19.0.0)
