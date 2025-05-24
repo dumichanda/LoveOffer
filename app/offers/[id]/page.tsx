@@ -33,6 +33,16 @@ export default function OfferDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { offers, bookOffer, likeOffer, currentUser } = useAppStore()
+
+  const offerId = params.id as string
+  // Debug logging
+  console.log("All offers:", offers)
+  console.log("Looking for offer ID:", offerId)
+  console.log(
+    "Offer found:",
+    offers.find((o) => o.id === offerId),
+  )
+
   const [selectedSlotId, setSelectedSlotId] = useState<string>("")
   const [showBookingDialog, setShowBookingDialog] = useState(false)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
@@ -40,7 +50,6 @@ export default function OfferDetailPage() {
   const [specialRequests, setSpecialRequests] = useState("")
   const [pendingBookingId, setPendingBookingId] = useState<string>("")
 
-  const offerId = params.id as string
   const offer = offers.find((o) => o.id === offerId)
 
   const totalUnreadChats = useAppStore((state) => state.chats.reduce((total, chat) => total + chat.unreadCount, 0))

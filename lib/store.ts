@@ -233,6 +233,52 @@ const mockHostUser2: User = {
   },
 }
 
+const mockHostUser3: User = {
+  id: "host_3",
+  name: "Emma Thompson",
+  email: "emma@example.com",
+  initials: "ET",
+  isVerified: true,
+  rating: 4.7,
+  reviewCount: 31,
+  bio: "Adventure guide and outdoor enthusiast",
+  subscription: "premium",
+  bookingHistory: {
+    totalConfirmed: 35,
+    totalCanceled: 2,
+    cancelationRate: 5.4,
+  },
+  stats: {
+    datesHosted: 38,
+    datesAttended: 15,
+    activeBids: 2,
+    listedOffers: 7,
+  },
+}
+
+const mockHostUser4: User = {
+  id: "host_4",
+  name: "David Rodriguez",
+  email: "david@example.com",
+  initials: "DR",
+  isVerified: true,
+  rating: 4.6,
+  reviewCount: 22,
+  bio: "Art curator and culture enthusiast",
+  subscription: "standard",
+  bookingHistory: {
+    totalConfirmed: 25,
+    totalCanceled: 3,
+    cancelationRate: 10.7,
+  },
+  stats: {
+    datesHosted: 28,
+    datesAttended: 20,
+    activeBids: 1,
+    listedOffers: 4,
+  },
+}
+
 const mockMessages: Message[] = [
   {
     id: "msg_1",
@@ -298,7 +344,7 @@ const mockChats: Chat[] = [
     messages: mockMessages.filter((msg) => msg.chatId === "chat_1"),
     booking: {
       id: "booking_1",
-      offerId: "offer_1",
+      offerId: "1",
       hostId: "host_1",
       guestId: "user_1",
       createdAt: "2024-01-15T09:00:00Z",
@@ -330,7 +376,7 @@ const mockChats: Chat[] = [
     messages: mockMessages.filter((msg) => msg.chatId === "chat_2"),
     booking: {
       id: "booking_2",
-      offerId: "offer_2",
+      offerId: "2",
       hostId: "host_2",
       guestId: "user_1",
       createdAt: "2024-01-14T14:00:00Z",
@@ -353,9 +399,10 @@ const mockChats: Chat[] = [
 
 const mockOffers: Offer[] = [
   {
-    id: "offer_1",
+    id: "1",
     title: "Romantic Dinner at Sunset",
-    description: "A beautiful dinner experience with city views",
+    description:
+      "A beautiful dinner experience with city views and gourmet cuisine. Perfect for couples looking for an intimate evening together.",
     price: 250,
     location: "Cape Town Waterfront",
     category: "Dining",
@@ -389,12 +436,20 @@ const mockOffers: Offer[] = [
         endTime: "21:00",
         isBooked: false,
       },
+      {
+        id: "slot_1a",
+        date: "2024-01-22",
+        startTime: "19:00",
+        endTime: "22:00",
+        isBooked: false,
+      },
     ],
   },
   {
-    id: "offer_2",
+    id: "2",
     title: "Wine Tasting Adventure",
-    description: "Explore local wines with an expert sommelier",
+    description:
+      "Explore local wines with an expert sommelier in the beautiful Stellenbosch wine region. Learn about wine pairing and tasting techniques.",
     price: 180,
     location: "Stellenbosch",
     category: "Wine & Spirits",
@@ -428,25 +483,80 @@ const mockOffers: Offer[] = [
         endTime: "17:00",
         isBooked: false,
       },
+      {
+        id: "slot_2a",
+        date: "2024-01-23",
+        startTime: "15:00",
+        endTime: "18:00",
+        isBooked: false,
+      },
     ],
   },
   {
-    id: "offer_3",
-    title: "Coffee & Art Gallery Tour",
-    description: "Discover local art while enjoying premium coffee",
+    id: "3",
+    title: "Hiking & Coffee Date",
+    description:
+      "Start with a scenic hike up Table Mountain followed by artisanal coffee at a local roastery. Perfect for active couples.",
     price: 120,
+    location: "Table Mountain, Cape Town",
+    category: "Adventure",
+    images: ["/placeholder.svg?height=500&width=400&text=Hiking+Coffee"],
+    hostId: "host_3",
+    host: mockHostUser3,
+    maxGuests: 2,
+    rating: 4.7,
+    reviewCount: 31,
+    views: 134,
+    likes: 28,
+    tags: ["hiking", "coffee", "adventure", "nature"],
+    status: "active",
+    cancellationPolicy: "flexible",
+    bookingStats: {
+      totalBookings: 15,
+      confirmedBookings: 13,
+      canceledBookings: 2,
+      pendingPayments: 1,
+    },
+    analytics: {
+      totalViews: 134,
+      totalLikes: 28,
+      totalBookings: 12,
+    },
+    availableSlots: [
+      {
+        id: "slot_3",
+        date: "2024-01-22",
+        startTime: "08:00",
+        endTime: "12:00",
+        isBooked: false,
+      },
+      {
+        id: "slot_3a",
+        date: "2024-01-24",
+        startTime: "07:30",
+        endTime: "11:30",
+        isBooked: false,
+      },
+    ],
+  },
+  {
+    id: "4",
+    title: "Art Gallery Evening",
+    description:
+      "Discover local art while enjoying premium coffee and light snacks. A cultural experience perfect for art lovers.",
+    price: 95,
     location: "Cape Town City Centre",
     category: "Culture",
     images: ["/placeholder.svg?height=500&width=400&text=Art+Gallery"],
-    hostId: "user_1",
-    host: mockUser,
+    hostId: "host_4",
+    host: mockHostUser4,
     maxGuests: 3,
     rating: 4.6,
-    reviewCount: 12,
+    reviewCount: 22,
     views: 67,
     likes: 18,
     tags: ["art", "coffee", "culture"],
-    status: "paused",
+    status: "active",
     cancellationPolicy: "strict",
     bookingStats: {
       totalBookings: 5,
@@ -461,10 +571,50 @@ const mockOffers: Offer[] = [
     },
     availableSlots: [
       {
-        id: "slot_3",
-        date: "2024-01-22",
-        startTime: "10:00",
-        endTime: "13:00",
+        id: "slot_4",
+        date: "2024-01-23",
+        startTime: "18:00",
+        endTime: "21:00",
+        isBooked: false,
+      },
+    ],
+  },
+  {
+    id: "5",
+    title: "Cooking Class Together",
+    description:
+      "Learn to cook traditional South African dishes together in a fun, interactive cooking class. Includes dinner and wine.",
+    price: 320,
+    location: "Stellenbosch",
+    category: "Dining",
+    images: ["/placeholder.svg?height=500&width=400&text=Cooking+Class"],
+    hostId: "host_1",
+    host: mockHostUser,
+    maxGuests: 4,
+    rating: 4.9,
+    reviewCount: 16,
+    views: 98,
+    likes: 35,
+    tags: ["cooking", "traditional", "interactive", "wine"],
+    status: "active",
+    cancellationPolicy: "moderate",
+    bookingStats: {
+      totalBookings: 8,
+      confirmedBookings: 7,
+      canceledBookings: 1,
+      pendingPayments: 0,
+    },
+    analytics: {
+      totalViews: 98,
+      totalLikes: 35,
+      totalBookings: 6,
+    },
+    availableSlots: [
+      {
+        id: "slot_5",
+        date: "2024-01-25",
+        startTime: "16:00",
+        endTime: "20:00",
         isBooked: false,
       },
     ],
@@ -482,7 +632,7 @@ const mockNotifications: Notification[] = [
     priority: "medium",
     read: false,
     timestamp: "2024-01-15T09:00:00Z",
-    actionUrl: "/offers/offer_2",
+    actionUrl: "/offers/2",
   },
 ]
 
@@ -498,7 +648,7 @@ const mockBlockedDates: BlockedDate[] = [
 const mockBookings: Booking[] = [
   {
     id: "booking_1",
-    offerId: "offer_1",
+    offerId: "1",
     guestId: "user_1",
     hostId: "host_1",
     status: "confirmed",
