@@ -1,66 +1,54 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useEffect, useState } from "react"
-import { io, type Socket } from "socket.io-client"
+
+import { createContext, useContext, useState } from "react"
 import { useSession } from "next-auth/react"
 
 interface SocketContextType {
-  socket: Socket | null
   isConnected: boolean
+  sendMessage: (chatId: string, message: string) => void
+  joinChat: (chatId: string) => void
+  leaveChat: (chatId: string) => void
 }
 
 const SocketContext = createContext<SocketContextType>({
-  socket: null,
   isConnected: false,
+  sendMessage: () => {},
+  joinChat: () => {},
+  leaveChat: () => {},
 })
 
-export const useSocket = () => {
-  const context = useContext(SocketContext)
-  if (!context) {
-    throw new Error("useSocket must be used within a SocketProvider")
-  }
-  return context
-}
-
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const { data: session } = useSession()
 
-  useEffect(() => {
-    if (session?.user) {
-      // Initialize socket connection
-      const socketInstance = io(process.env.NODE_ENV === "production" ? "" : "http://localhost:3000", {
-        path: "/api/socket/io",
-        addTrailingSlash: false,
-      })
+  // Simplified socket provider without actual Socket.IO for now
+  const sendMessage = (chatId: string, message: string) => {
+    console.log("Sending message:", { chatId, message })
+    // This will be implemented with actual Socket.IO later
+  }
 
-      socketInstance.on("connect", () => {
-        console.log("Socket connected:", socketInstance.id)
-        setIsConnected(true)
+  const joinChat = (chatId: string) => {
+    console.log("Joining chat:", chatId)
+  }
 
-        // Join user room for personal notifications
-        socketInstance.emit("join-user-room", session.user.id)
-      })
+  const leaveChat = (chatId: string) => {
+    console.log("Leaving chat:", chatId)
+  }
 
-      socketInstance.on("disconnect", () => {
-        console.log("Socket disconnected")
-        setIsConnected(false)
-      })
-
-      socketInstance.on("connect_error", (error) => {
-        console.error("Socket connection error:", error)
-        setIsConnected(false)
-      })
-
-      setSocket(socketInstance)
-
-      return () => {
-        socketInstance.close()
-      }
-    }
-  }, [session])
-
-  return <SocketContext.Provider value={{ socket, isConnected }}>{children}</SocketContext.Provider>
+  return (
+    <SocketContext.Provider
+      value={{
+        isConnected,
+        sendMessage,
+        joinChat,
+        leaveChat,
+      }}
+    >
+      {children}
+    </SocketContext.Provider>
+  )
 }
+
+export const useSocket = () => useContext(SocketContext)
