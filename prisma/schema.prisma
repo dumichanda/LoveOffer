@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,18 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@map("users")
 }
 
 model Account {
@@ -39,7 +24,6 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@map("accounts")
 }
 
 model Session {
@@ -48,8 +32,31 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-  @@map("sessions")
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Dating app specific fields
+  bio           String?
+  isVerified    Boolean   @default(false)
+  subscription  String    @default("free")
+  
+  // Relations
+  hostedOffers  Offer[]   @relation("HostedOffers")
+  bookings      Booking[] @relation("GuestBookings")
+  hostBookings  Booking[] @relation("HostBookings")
+  sentMessages  Message[] @relation("SentMessages")
+  chatParticipants ChatParticipant[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model VerificationToken {
@@ -58,5 +65,113 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-  @@map("verificationtokens")
+}
+
+model Offer {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  price           Float
+  location        String
+  category        String
+  images          String[]
+  maxGuests       Int      @default(2)
+  tags            String[]
+  status          String   @default("active")
+  cancellationPolicy String @default("moderate")
+  
+  hostId          String
+  host            User     @relation("HostedOffers", fields: [hostId], references: [id])
+  
+  bookings        Booking[]
+  availableSlots  AvailableSlot[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AvailableSlot {
+  id        String   @id @default(cuid())
+  date      DateTime
+  startTime String
+  endTime   String
+  isBooked  Boolean  @default(false)
+  
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  
+  bookings  Booking[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  status          String   @default("pending")
+  guestCount      Int      @default(1)
+  specialRequests String?
+  paymentConfirmed Boolean @default(false)
+  paymentConfirmedAt DateTime?
+  cancellationReason String?
+  
+  offerId         String
+  offer           Offer    @relation(fields: [offerId], references: [id])
+  
+  slotId          String
+  slot            AvailableSlot @relation(fields: [slotId], references: [id])
+  
+  guestId         String
+  guest           User     @relation("GuestBookings", fields: [guestId], references: [id])
+  
+  hostId          String
+  host            User     @relation("HostBookings", fields: [hostId], references: [id])
+  
+  chatId          String   @unique
+  chat            Chat     @relation(fields: [chatId], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Chat {
+  id            String   @id @default(cuid())
+  
+  booking       Booking?
+  participants  ChatParticipant[]
+  messages      Message[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ChatParticipant {
+  id     String @id @default(cuid())
+  
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  joinedAt DateTime @default(now())
+  
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  read      Boolean  @default(false)
+  
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([chatId, createdAt])
 }

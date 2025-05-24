@@ -1,69 +1,152 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { ArrowLeft, Send, Phone, Video, MoreVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
-import { useAppStore } from "@/lib/store"
+import { useSocket } from "@/lib/socket-context"
+import { useChatStore } from "@/lib/store-persistent"
 import { getTimeAgo } from "@/lib/utils"
 
 export default function ChatDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { chats, currentUser, addMessage, markMessagesRead } = useAppStore()
-  const [newMessage, setNewMessage] = useState("")
+  const { data: session } = useSession()
+  const { socket } = useSocket()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  const { messages, fetchMessages, sendMessage, markMessagesRead, addMessage, updateMessageReadStatus } = useChatStore()
+
+  const [newMessage, setNewMessage] = useState("")
+  const [isTyping, setIsTyping] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+
   const chatId = params.id as string
-  const chat = chats.find((c) => c.id === chatId)
+  const chatMessages = messages[chatId] || []
 
   useEffect(() => {
-    if (chat) {
+    if (chatId && session?.user?.id) {
+      // Fetch messages for this chat
+      fetchMessages(chatId).finally(() => setLoading(false))
+
+      // Mark messages as read
       markMessagesRead(chatId)
+
+      // Join chat room for real-time updates
+      if (socket) {
+        socket.emit("join-chat", chatId)
+
+        // Listen for new messages
+        socket.on("new_message", ({ chatId: messageChatId, message }) => {
+          if (messageChatId === chatId) {
+            addMessage(message)
+            scrollToBottom()
+          }
+        })
+
+        // Listen for read receipts
+        socket.on("messages_read", ({ chatId: readChatId, readBy }) => {
+          if (readChatId === chatId) {
+            updateMessageReadStatus(chatId, readBy)
+          }
+        })
+
+        // Listen for typing indicators
+        socket.on("user-typing", ({ userId, userName }) => {
+          if (userId !== session.user.id) {
+            setTypingUsers((prev) => [...prev.filter((id) => id !== userId), userId])
+          }
+        })
+
+        socket.on("user-stopped-typing", ({ userId }) => {
+          setTypingUsers((prev) => prev.filter((id) => id !== userId))
+        })
+
+        return () => {
+          socket.emit("leave-chat", chatId)
+          socket.off("new_message")
+          socket.off("messages_read")
+          socket.off("user-typing")
+          socket.off("user-stopped-typing")
+        }
+      }
     }
-  }, [chat, chatId, markMessagesRead])
+  }, [chatId, session?.user?.id, socket])
 
   useEffect(() => {
     scrollToBottom()
-  }, [chat?.messages])
+  }, [chatMessages])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  if (!chat || !currentUser) {
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newMessage.trim() || !session?.user?.id) return
+
+    const messageContent = newMessage.trim()
+    setNewMessage("")
+
+    // Stop typing indicator
+    if (socket && isTyping) {
+      socket.emit("typing-stop", { chatId, userId: session.user.id })
+      setIsTyping(false)
+    }
+
+    try {
+      await sendMessage(chatId, messageContent)
+    } catch (error) {
+      console.error("Failed to send message:", error)
+      // Optionally show error toast
+    }
+  }
+
+  const handleTyping = (value: string) => {
+    setNewMessage(value)
+
+    if (socket && session?.user?.id) {
+      if (value.trim() && !isTyping) {
+        socket.emit("typing-start", {
+          chatId,
+          userId: session.user.id,
+          userName: session.user.name,
+        })
+        setIsTyping(true)
+      } else if (!value.trim() && isTyping) {
+        socket.emit("typing-stop", { chatId, userId: session.user.id })
+        setIsTyping(false)
+      }
+    }
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <Card className="p-8 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Chat Not Found</h2>
-          <Button onClick={() => router.back()}>Go Back</Button>
-        </Card>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading chat...</p>
+        </div>
       </div>
     )
   }
 
-  const otherParticipant =
-    chat.participants.find((id) => id !== currentUser.id) === chat.booking.hostId
-      ? chat.booking.host
-      : chat.booking.guest
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newMessage.trim()) return
-
-    addMessage(chatId, {
-      chatId,
-      senderId: currentUser.id,
-      content: newMessage.trim(),
-      read: false,
-    })
-
-    setNewMessage("")
+  if (!session?.user?.id) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Card className="p-8 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Authentication Required</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Please sign in to access chat</p>
+          <Button onClick={() => router.push("/auth/signin")}>Sign In</Button>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -75,11 +158,15 @@ export default function ChatDetailPage() {
             <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
           <Avatar className="w-8 h-8">
-            <AvatarFallback>{otherParticipant.initials}</AvatarFallback>
+            <AvatarFallback>CH</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold text-gray-900 dark:text-white">{otherParticipant.name}</h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{chat.booking.offer.title}</p>
+            <h1 className="font-semibold text-gray-900 dark:text-white">Chat</h1>
+            {typingUsers.length > 0 && (
+              <p className="text-xs text-green-500">
+                {typingUsers.length === 1 ? "Typing..." : `${typingUsers.length} people typing...`}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -95,27 +182,15 @@ export default function ChatDetailPage() {
         </div>
       </div>
 
-      {/* Booking Info */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 py-3">
-        <div className="text-sm">
-          <p className="font-medium text-blue-900 dark:text-blue-100">{chat.booking.offer.title}</p>
-          <p className="text-blue-700 dark:text-blue-200">
-            📅 {new Date(chat.booking.slot.date).toLocaleDateString()} at {chat.booking.slot.startTime} -{" "}
-            {chat.booking.slot.endTime}
-          </p>
-          <p className="text-blue-700 dark:text-blue-200">📍 {chat.booking.offer.location}</p>
-        </div>
-      </div>
-
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {chat.messages.length === 0 ? (
+        {chatMessages.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 dark:text-gray-400">No messages yet. Start the conversation!</p>
           </div>
         ) : (
-          chat.messages.map((message) => {
-            const isOwnMessage = message.senderId === currentUser.id
+          chatMessages.map((message) => {
+            const isOwnMessage = message.senderId === session.user.id
             return (
               <div key={message.id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
                 <div
@@ -126,9 +201,16 @@ export default function ChatDetailPage() {
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
-                  <p className={`text-xs mt-1 ${isOwnMessage ? "text-red-100" : "text-gray-500 dark:text-gray-400"}`}>
-                    {getTimeAgo(message.timestamp)}
-                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className={`text-xs ${isOwnMessage ? "text-red-100" : "text-gray-500 dark:text-gray-400"}`}>
+                      {getTimeAgo(message.createdAt)}
+                    </p>
+                    {isOwnMessage && (
+                      <span className={`text-xs ${message.read ? "text-red-200" : "text-red-300"}`}>
+                        {message.read ? "✓✓" : "✓"}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )
@@ -142,7 +224,7 @@ export default function ChatDetailPage() {
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => handleTyping(e.target.value)}
             placeholder="Type a message..."
             className="flex-1 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
           />
