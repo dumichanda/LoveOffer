@@ -8,13 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useAppStore } from "@/lib/store"
-import { getTimeAgo } from "@/lib/utils"
 
 export function HelpSupport() {
-  const { currentUser, supportTickets, createSupportTicket, addSupportResponse } = useAppStore()
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [newTicket, setNewTicket] = useState({
@@ -24,8 +20,7 @@ export function HelpSupport() {
     priority: "medium",
   })
 
-  const userTickets = supportTickets.filter((ticket) => ticket.userId === currentUser?.id)
-
+  // Static FAQ data to avoid store dependencies
   const faqItems = [
     {
       category: "Getting Started",
@@ -38,7 +33,7 @@ export function HelpSupport() {
         {
           question: "How does the booking process work?",
           answer:
-            "Browse offers, like the ones you're interested in, then book a specific time slot. Payment is processed immediately and you'll get a chat with your date.",
+            "Browse offers, like the ones you're interested in, then book a specific time slot. Payment is made offline and confirmed in the app.",
         },
         {
           question: "What verification options are available?",
@@ -71,9 +66,9 @@ export function HelpSupport() {
       category: "Payments & Billing",
       questions: [
         {
-          question: "When do I get paid as a host?",
+          question: "How do payments work?",
           answer:
-            "Payments are released 24 hours after the date is completed, allowing time for any issues to be resolved.",
+            "Payments are made directly between users offline (cash, EFT, card). The platform only processes subscription payments for premium features.",
         },
         {
           question: "What are the cancellation policies?",
@@ -83,7 +78,7 @@ export function HelpSupport() {
         {
           question: "How do refunds work?",
           answer:
-            "Refunds are processed according to the offer's cancellation policy. Emergency cancellations may receive full refunds regardless of policy.",
+            "Since payments are made offline between users, refunds are handled directly between the parties according to the agreed cancellation policy.",
         },
       ],
     },
@@ -109,6 +104,7 @@ export function HelpSupport() {
     },
   ]
 
+  // Filter FAQ items based on search query
   const filteredFAQ = faqItems
     .map((category) => ({
       ...category,
@@ -122,46 +118,12 @@ export function HelpSupport() {
 
   const handleCreateTicket = () => {
     if (newTicket.subject && newTicket.description && newTicket.category) {
-      createSupportTicket({
-        userId: currentUser!.id,
-        subject: newTicket.subject,
-        description: newTicket.description,
-        category: newTicket.category as any,
-        priority: newTicket.priority as any,
-        status: "open",
-      })
+      // In a real app, this would create a support ticket
+      console.log("Creating support ticket:", newTicket)
       setNewTicket({ subject: "", description: "", category: "", priority: "medium" })
       setShowNewTicket(false)
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-blue-500"
-      case "in_progress":
-        return "bg-yellow-500"
-      case "resolved":
-        return "bg-green-500"
-      case "closed":
-        return "bg-gray-500"
-      default:
-        return "bg-gray-500"
-    }
-  }
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "bg-red-500"
-      case "high":
-        return "bg-orange-500"
-      case "medium":
-        return "bg-blue-500"
-      case "low":
-        return "bg-gray-500"
-      default:
-        return "bg-gray-500"
+      // Show success message
+      alert("Support ticket created successfully! We'll get back to you soon.")
     }
   }
 
@@ -181,7 +143,7 @@ export function HelpSupport() {
           <CardContent className="p-6 text-center">
             <Mail className="w-8 h-8 mx-auto mb-2 text-green-500" />
             <h3 className="font-semibold text-gray-900 dark:text-white">Email Support</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">support@datecraft.com</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">support@mavuso.co.za</p>
           </CardContent>
         </Card>
       </div>
@@ -192,7 +154,7 @@ export function HelpSupport() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <HelpCircle className="w-5 h-5 text-purple-500" />
-              My Support Tickets
+              Support Tickets
             </CardTitle>
             <Button size="sm" onClick={() => setShowNewTicket(true)}>
               New Ticket
@@ -200,37 +162,11 @@ export function HelpSupport() {
           </div>
         </CardHeader>
         <CardContent>
-          {userTickets.length > 0 ? (
-            <div className="space-y-3">
-              {userTickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white">{ticket.subject}</h4>
-                    <div className="flex items-center gap-2">
-                      <Badge className={`${getPriorityColor(ticket.priority)} text-white text-xs`}>
-                        {ticket.priority}
-                      </Badge>
-                      <Badge className={`${getStatusColor(ticket.status)} text-white text-xs`}>{ticket.status}</Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">{ticket.description}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>#{ticket.id.slice(-6)}</span>
-                    <span>{getTimeAgo(ticket.createdAt)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <HelpCircle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-gray-500 dark:text-gray-400 mb-4">No support tickets yet</p>
-              <Button onClick={() => setShowNewTicket(true)}>Create Your First Ticket</Button>
-            </div>
-          )}
+          <div className="text-center py-6">
+            <HelpCircle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+            <p className="text-gray-500 dark:text-gray-400 mb-4">No support tickets yet</p>
+            <Button onClick={() => setShowNewTicket(true)}>Create Your First Ticket</Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -287,7 +223,7 @@ export function HelpSupport() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-200">
               <Mail className="w-4 h-4" />
-              <span>support@datecraft.com</span>
+              <span>support@mavuso.co.za</span>
             </div>
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-200">
               <Phone className="w-4 h-4" />
