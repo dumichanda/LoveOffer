@@ -6,6 +6,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
   ],
   pages: {
@@ -27,7 +34,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   session: {
-    strategy: "jwt", // Use JWT instead of database sessions initially
+    strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
