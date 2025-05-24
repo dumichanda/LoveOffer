@@ -97,10 +97,15 @@ export default function HomePage() {
   const currentOffer = mockOffers[currentOfferIndex]
 
   useEffect(() => {
-    // Check if user chose to browse without account
+    // Check if user chose to browse without account from URL params or localStorage
     const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get("browse") === "true") {
+    const browseParam = urlParams.get("browse")
+    const storedBrowseState = localStorage.getItem("browseWithoutAccount")
+
+    if (browseParam === "true" || storedBrowseState === "true") {
       setBrowseWithoutAccount(true)
+      // Store the preference
+      localStorage.setItem("browseWithoutAccount", "true")
     }
   }, [])
 
@@ -138,6 +143,11 @@ export default function HomePage() {
     signIn("google")
   }
 
+  const handleBrowseWithoutAccount = () => {
+    setBrowseWithoutAccount(true)
+    localStorage.setItem("browseWithoutAccount", "true")
+  }
+
   const isOfferFavorited = currentOffer ? favorites.includes(currentOffer.id) : false
 
   // Show landing page for unauthenticated users who haven't chosen to browse
@@ -166,7 +176,7 @@ export default function HomePage() {
               <Button onClick={handleSignIn} className="w-full" size="lg">
                 Sign In with Google
               </Button>
-              <Button variant="outline" onClick={() => setBrowseWithoutAccount(true)} className="w-full">
+              <Button variant="outline" onClick={handleBrowseWithoutAccount} className="w-full">
                 Browse Without Account
               </Button>
             </div>
