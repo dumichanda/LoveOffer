@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Bell, Plus, ImageIcon, AlertCircle } from "lucide-react"
+import { Bell, Plus, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,6 +18,8 @@ import { generateId } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { createOfferSchema, type CreateOffer } from "@/lib/validations"
 import { sanitizeObject } from "@/lib/validation-middleware"
+import { ImageUpload } from "@/components/image-upload"
+import type { UploadedImage } from "@/lib/image-upload"
 
 interface FormData {
   title: string
@@ -26,6 +28,7 @@ interface FormData {
   priceType: "fixed" | "auction" | "negotiable"
   price: string
   images: string[]
+  uploadedImages: UploadedImage[]
   timeSlots: Omit<TimeSlot, "id" | "isBooked" | "bookedBy">[]
   category: string
   maxGuests: string
@@ -46,7 +49,8 @@ export default function CreateOfferPage() {
     location: "",
     priceType: "fixed",
     price: "",
-    images: [""],
+    images: [],
+    uploadedImages: [],
     timeSlots: [{ date: "2025-05-24", startTime: "14:00", endTime: "16:00" }],
     category: "",
     maxGuests: "2",
@@ -62,25 +66,6 @@ export default function CreateOfferPage() {
 
     // Clear validation errors for this field
     setValidationErrors((prev) => prev.filter((error) => error.field !== field))
-  }
-
-  const addImageUrl = () => {
-    if (formData.images.length < 5) {
-      updateFormData("images", [...formData.images, ""])
-    }
-  }
-
-  const updateImageUrl = (index: number, value: string) => {
-    const newImages = [...formData.images]
-    newImages[index] = value
-    updateFormData("images", newImages)
-  }
-
-  const removeImageUrl = (index: number) => {
-    if (formData.images.length > 1) {
-      const newImages = formData.images.filter((_, i) => i !== index)
-      updateFormData("images", newImages)
-    }
   }
 
   const addTimeSlot = () => {
@@ -105,13 +90,18 @@ export default function CreateOfferPage() {
   const validateForm = (): boolean => {
     try {
       // Prepare data for validation
+      const allImages = [
+        ...formData.images.filter((img) => img.trim() !== ""),
+        ...formData.uploadedImages.map((img) => img.url),
+      ]
+
       const dataToValidate: CreateOffer = {
         title: formData.title,
         description: formData.description,
         location: formData.location,
         price: Number.parseFloat(formData.price),
         priceType: formData.priceType,
-        images: formData.images.filter((img) => img.trim() !== ""),
+        images: allImages,
         timeSlots: formData.timeSlots,
         category: formData.category,
         maxGuests: Number.parseInt(formData.maxGuests),
@@ -159,13 +149,18 @@ export default function CreateOfferPage() {
         isBooked: false,
       }))
 
+      const allImages = [
+        ...formData.images.filter((img) => img.trim() !== ""),
+        ...formData.uploadedImages.map((img) => img.url),
+      ]
+
       const newOffer = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         location: formData.location.trim(),
         price: Number.parseFloat(formData.price),
         priceType: formData.priceType,
-        images: formData.images.filter((img) => img.trim() !== ""),
+        images: allImages,
         hostId: currentUser.id,
         host: currentUser,
         rating: 0,
@@ -385,46 +380,13 @@ export default function CreateOfferPage() {
         </div>
 
         {/* Offer Images */}
-        <div className="space-y-3">
-          <Label className="text-gray-900 dark:text-gray-100">Offer Images (URLs - max 5) *</Label>
-          {formData.images.map((url, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                value={url}
-                onChange={(e) => updateImageUrl(index, e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className={`rounded-full flex-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white ${
-                  getFieldError(`images.${index}`) ? "border-red-500" : ""
-                }`}
-              />
-              {formData.images.length > 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeImageUrl(index)}
-                  className="px-3 text-red-500 border-red-500"
-                >
-                  ×
-                </Button>
-              )}
-            </div>
-          ))}
-          {getFieldError("images") && (
-            <p className="text-sm text-red-600 dark:text-red-400">{getFieldError("images")}</p>
-          )}
-          {formData.images.length < 5 && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addImageUrl}
-              className="rounded-full text-red-500 border-red-500"
-            >
-              <ImageIcon className="w-4 h-4 mr-2" />
-              Add Image URL
-            </Button>
-          )}
-        </div>
+        <ImageUpload
+          images={formData.uploadedImages}
+          urlImages={formData.images}
+          onImagesChange={(images) => updateFormData("uploadedImages", images)}
+          onUrlImagesChange={(urls) => updateFormData("images", urls)}
+          error={getFieldError("images")}
+        />
 
         {/* Available Slots */}
         <div className="space-y-3">

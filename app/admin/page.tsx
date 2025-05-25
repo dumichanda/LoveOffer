@@ -13,8 +13,11 @@ import { PaymentSettings } from "@/components/admin/payment-settings"
 import { NotificationSettings } from "@/components/admin/notification-settings"
 import { AdminLogin } from "@/components/admin-login"
 import { useAdmin } from "@/lib/admin-context"
+// Import the new DatabaseManagement component
+import { DatabaseManagement } from "@/components/admin/database-management"
 
-const adminTabs = ["Overview", "Analytics", "Users", "Offers", "Bookings", "Settings"]
+// Update the adminTabs array to include Database
+const adminTabs = ["Overview", "Analytics", "Users", "Offers", "Bookings", "Database", "Settings"]
 
 // Mock data
 const mockUsers = [
@@ -1194,6 +1197,9 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Database Tab */}
+        {activeTab === "Database" && <DatabaseManagement />}
+
         {/* Settings Tab */}
         {activeTab === "Settings" && (
           <div className="space-y-6">
@@ -1338,7 +1344,8 @@ export default function AdminPage() {
           activeTab !== "Settings" &&
           activeTab !== "Analytics" &&
           activeTab !== "Offers" &&
-          activeTab !== "Bookings" && (
+          activeTab !== "Bookings" &&
+          activeTab !== "Database" && (
             <Card className="dark:bg-gray-800">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">{activeTab}</h3>
