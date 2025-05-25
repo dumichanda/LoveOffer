@@ -345,24 +345,6 @@ export default function HomePage() {
                 <span className="text-base">📍 {currentOffer.location}</span>
               </div>
 
-              {/* Analytics */}
-              {currentOffer.analytics && (
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  <div className="bg-green-500/80 backdrop-blur-sm rounded-lg p-2 text-center">
-                    <div className="text-white text-lg font-bold">👁️ {currentOffer.analytics.totalViews}</div>
-                    <div className="text-white text-xs">Views</div>
-                  </div>
-                  <div className="bg-red-500/80 backdrop-blur-sm rounded-lg p-2 text-center">
-                    <div className="text-white text-lg font-bold">❤️ {currentOffer._count?.favorites || 0}</div>
-                    <div className="text-white text-xs">Favorites</div>
-                  </div>
-                  <div className="bg-blue-500/80 backdrop-blur-sm rounded-lg p-2 text-center">
-                    <div className="text-white text-lg font-bold">⭐ {currentOffer._count?.reviews || 0}</div>
-                    <div className="text-white text-xs">Reviews</div>
-                  </div>
-                </div>
-              )}
-
               <div className="flex items-center gap-4 mb-3 text-sm">
                 <div>
                   <span>
