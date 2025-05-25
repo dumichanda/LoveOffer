@@ -210,7 +210,7 @@ export default function HomePage() {
       <div className="p-3">
         <Card
           className="relative overflow-hidden w-full cursor-pointer bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-          onClick={handleViewOffer}
+          onDoubleClick={handleViewOffer}
         >
           {/* Image */}
           <div
