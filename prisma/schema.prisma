@@ -16,11 +16,35 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  bio           String?   @db.Text
+  age           Int?
+  location      String?
+  interests     String[]
+  phone         String?
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  lastSeen      DateTime  @default(now())
+  
+  // Relationships
   accounts      Account[]
   sessions      Session[]
+  hostedOffers  Offer[]   @relation("HostedOffers")
+  bookings      Booking[] @relation("UserBookings")
+  sentMessages  Message[] @relation("SentMessages")
+  chats         ChatParticipant[]
+  reviews       Review[]  @relation("ReviewAuthor")
+  receivedReviews Review[] @relation("ReviewTarget")
+  favorites     Favorite[]
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Indexes for performance
+  @@index([email])
+  @@index([location])
+  @@index([age])
+  @@index([isActive])
+  @@index([lastSeen])
   @@map("users")
 }
 
@@ -41,6 +65,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -51,6 +76,8 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([expires])
   @@map("sessions")
 }
 
@@ -60,5 +87,285 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@index([expires])
   @@map("verificationtokens")
+}
+
+model Offer {
+  id              String      @id @default(cuid())
+  title           String      @db.VarChar(255)
+  description     String      @db.Text
+  shortDescription String?    @db.VarChar(500)
+  price           Decimal     @db.Decimal(10,2)
+  priceType       PriceType   @default(FIXED)
+  category        Category
+  subcategory     String?
+  location        String      @db.VarChar(255)
+  address         String?     @db.Text
+  coordinates     String?     // "lat,lng" format
+  images          String[]
+  maxGuests       Int         @default(1)
+  minAge          Int?        @default(18)
+  duration        Int?        // Duration in minutes
+  tags            String[]
+  
+  // Host information
+  hostId          String
+  host            User        @relation("HostedOffers", fields: [hostId], references: [id], onDelete: Cascade)
+  
+  // Status and visibility
+  status          OfferStatus @default(ACTIVE)
+  isPublished     Boolean     @default(true)
+  isFeatured      Boolean     @default(false)
+  
+  // Analytics
+  viewCount       Int         @default(0)
+  likeCount       Int         @default(0)
+  bookingCount    Int         @default(0)
+  
+  // Policies
+  cancellationPolicy CancellationPolicy @default(MODERATE)
+  instantBook     Boolean     @default(false)
+  requiresApproval Boolean    @default(false)
+  
+  // Relationships
+  timeSlots       TimeSlot[]
+  bookings        Booking[]
+  reviews         Review[]
+  favorites       Favorite[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Indexes for performance
+  @@index([category])
+  @@index([location])
+  @@index([price])
+  @@index([status])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([hostId])
+  @@index([createdAt])
+  @@index([viewCount])
+  @@index([category, location])
+  @@index([price, category])
+  @@fulltext([title, description])
+  @@map("offers")
+}
+
+model TimeSlot {
+  id          String    @id @default(cuid())
+  offerId     String
+  offer       Offer     @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  date        DateTime  @db.Date
+  startTime   String    @db.VarChar(5) // "HH:MM" format
+  endTime     String    @db.VarChar(5) // "HH:MM" format
+  isBooked    Boolean   @default(false)
+  isBlocked   Boolean   @default(false)
+  maxGuests   Int?
+  
+  bookings    Booking[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([offerId])
+  @@index([date])
+  @@index([isBooked])
+  @@index([date, isBooked])
+  @@map("time_slots")
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  offerId         String
+  offer           Offer         @relation(fields: [offerId], references: [id])
+  timeSlotId      String
+  timeSlot        TimeSlot      @relation(fields: [timeSlotId], references: [id])
+  userId          String
+  user            User          @relation("UserBookings", fields: [userId], references: [id])
+  
+  guestCount      Int           @default(1)
+  totalAmount     Decimal       @db.Decimal(10,2)
+  specialRequests String?       @db.Text
+  
+  status          BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   String?
+  paymentReference String?
+  
+  // Timestamps
+  bookedAt        DateTime      @default(now())
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  completedAt     DateTime?
+  
+  // Relationships
+  chat            Chat?
+  review          Review?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([offerId])
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([bookedAt])
+  @@map("bookings")
+}
+
+model Chat {
+  id          String    @id @default(cuid())
+  bookingId   String    @unique
+  booking     Booking   @relation(fields: [bookingId], references: [id])
+  
+  participants ChatParticipant[]
+  messages    Message[]
+  
+  lastMessageAt DateTime?
+  isActive    Boolean   @default(true)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([bookingId])
+  @@index([lastMessageAt])
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+  
+  @@unique([chatId, userId])
+  @@index([chatId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  
+  content   String   @db.Text
+  messageType MessageType @default(TEXT)
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([isRead])
+  @@map("messages")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId  String   // Host being reviewed
+  target    User     @relation("ReviewTarget", fields: [targetId], references: [id])
+  
+  rating    Int      // 1-5 stars
+  comment   String?  @db.Text
+  
+  isPublic  Boolean  @default(true)
+  isVerified Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([offerId])
+  @@index([authorId])
+  @@index([targetId])
+  @@index([rating])
+  @@index([createdAt])
+  @@map("reviews")
+}
+
+model Favorite {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  offerId String
+  offer   Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@unique([userId, offerId])
+  @@index([userId])
+  @@index([offerId])
+  @@map("favorites")
+}
+
+// Enums
+enum PriceType {
+  FIXED
+  AUCTION
+  NEGOTIABLE
+}
+
+enum Category {
+  ROMANTIC
+  ADVENTURE
+  DINING
+  ENTERTAINMENT
+  WELLNESS
+  CULTURE
+  NIGHTLIFE
+  SPORTS
+  EDUCATION
+  SOCIAL
+}
+
+enum OfferStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum CancellationPolicy {
+  FLEXIBLE
+  MODERATE
+  STRICT
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
 }
