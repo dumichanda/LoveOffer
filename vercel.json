@@ -1,6 +1,6 @@
 {
-  "buildCommand": "prisma generate && prisma db push && next build",
-  "installCommand": "npm install",
+  "buildCommand": "npm install --legacy-peer-deps && prisma generate && next build",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "functions": {
     "app/api/**/*.ts": {
@@ -8,6 +8,6 @@
     }
   },
   "env": {
-    "PRISMA_GENERATE_DATAPROXY": "true"
+    "NODE_VERSION": "18.x"
   }
 }
