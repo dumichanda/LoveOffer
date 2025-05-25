@@ -360,7 +360,7 @@ const mockMessages: Message[] = [
     id: "msg_8",
     chatId: "chat_3",
     senderId: "user_1",
-    content: "Absolutely! What should I bring?",
+    content: "What should I bring?",
     timestamp: "2024-01-16T18:15:00Z",
     read: true,
   },
@@ -464,7 +464,7 @@ const mockMessages: Message[] = [
     id: "msg_20",
     chatId: "chat_7",
     senderId: "user_1",
-    content: "Absolutely! Should I bring anything?",
+    content: "Should I bring anything?",
     timestamp: "2024-01-20T14:15:00Z",
     read: true,
   },
@@ -1048,9 +1048,16 @@ const mockBookings: Booking[] = [
   },
 ]
 
-// Store with message management
+// Store with message management and notification triggers
 const allMessages = [...mockMessages]
 const favoriteOffersList: string[] = ["2", "5", "8", "12"]
+
+// Global notification function (will be set by the provider)
+let globalShowNotification: ((notification: any) => void) | null = null
+
+export const setGlobalNotificationFunction = (fn: (notification: any) => void) => {
+  globalShowNotification = fn
+}
 
 export const useAppStore = () => {
   return {
@@ -1073,8 +1080,17 @@ export const useAppStore = () => {
     blockedDates: mockBlockedDates,
     bookings: mockBookings,
 
-    // Actions
+    // Actions with notification triggers
     likeOffer: (offerId: string) => {
+      const offer = mockOffers.find((o) => o.id === offerId)
+      if (offer && globalShowNotification) {
+        globalShowNotification({
+          type: "match",
+          title: "New Match! 💕",
+          message: `You liked "${offer.title}" by ${offer.host.name}`,
+          actionUrl: `/offers/${offerId}`,
+        })
+      }
       console.log("Liked offer:", offerId)
     },
 
@@ -1084,19 +1100,41 @@ export const useAppStore = () => {
 
     toggleFavorite: (offerId: string) => {
       const isFavorited = favoriteOffersList.includes(offerId)
+      const offer = mockOffers.find((o) => o.id === offerId)
 
       if (isFavorited) {
         // Remove from favorites
         const index = favoriteOffersList.indexOf(offerId)
         favoriteOffersList.splice(index, 1)
+        if (offer && globalShowNotification) {
+          globalShowNotification({
+            type: "info",
+            title: "Removed from Favorites",
+            message: `"${offer.title}" removed from your favorites`,
+          })
+        }
         console.log("Removed from favorites:", offerId)
       } else {
         // Add to favorites (with 10-offer limit)
         if (favoriteOffersList.length >= 10) {
+          if (globalShowNotification) {
+            globalShowNotification({
+              type: "warning",
+              title: "Favorites Limit Reached",
+              message: "You can only have 10 favorites. Remove some to add more.",
+            })
+          }
           console.log("Cannot add more favorites - limit of 10 reached")
           return false // Indicate limit reached
         }
         favoriteOffersList.push(offerId)
+        if (offer && globalShowNotification) {
+          globalShowNotification({
+            type: "success",
+            title: "Added to Favorites ⭐",
+            message: `"${offer.title}" added to your favorites`,
+          })
+        }
         console.log("Added to favorites:", offerId)
       }
       return true
@@ -1129,6 +1167,14 @@ export const useAppStore = () => {
 
     // Calendar actions
     addBlockedDate: (date: string, reason: string) => {
+      if (globalShowNotification) {
+        globalShowNotification({
+          type: "info",
+          title: "Date Blocked",
+          message: `${date} has been blocked: ${reason}`,
+          actionUrl: "/calendar",
+        })
+      }
       console.log("Added blocked date:", date, reason)
     },
 
@@ -1136,7 +1182,7 @@ export const useAppStore = () => {
       console.log("Removed blocked date:", id)
     },
 
-    // Chat actions
+    // Chat actions with notifications
     addMessage: (chatId: string, messageData: Omit<Message, "id" | "timestamp">) => {
       const newMessage: Message = {
         ...messageData,
@@ -1154,6 +1200,19 @@ export const useAppStore = () => {
           content: newMessage.content,
           senderId: newMessage.senderId,
           timestamp: newMessage.timestamp,
+        }
+
+        // Trigger notification for new message
+        const chat = mockChats[chatIndex]
+        const otherParticipant = chat.booking.host.id === mockUser.id ? chat.booking.guest : chat.booking.host
+
+        if (messageData.senderId !== mockUser.id && globalShowNotification) {
+          globalShowNotification({
+            type: "message",
+            title: "New Message 💬",
+            message: `${otherParticipant.name}: ${newMessage.content.substring(0, 50)}${newMessage.content.length > 50 ? "..." : ""}`,
+            actionUrl: `/chats/${chatId}`,
+          })
         }
       }
 
@@ -1210,20 +1269,56 @@ export const useAppStore = () => {
     users: [],
     auditLogs: [],
 
-    // Booking actions
+    // Booking actions with notifications
     bookOffer: (offerId: string, slotId: string, guestCount = 1, specialRequests?: string) => {
+      const offer = mockOffers.find((o) => o.id === offerId)
+      if (offer && globalShowNotification) {
+        globalShowNotification({
+          type: "booking",
+          title: "Booking Request Sent! 📅",
+          message: `Your booking request for "${offer.title}" has been sent to ${offer.host.name}`,
+          actionUrl: "/calendar",
+        })
+      }
       console.log("Created booking for offer:", offerId, "slot:", slotId)
     },
 
     confirmPayment: (bookingId: string) => {
+      const booking = mockBookings.find((b) => b.id === bookingId)
+      if (booking && globalShowNotification) {
+        globalShowNotification({
+          type: "payment",
+          title: "Payment Confirmed! 💳",
+          message: `Payment confirmed for "${booking.offer.title}" - R${booking.offer.price}`,
+          actionUrl: "/calendar",
+        })
+      }
       console.log("Payment confirmed for booking:", bookingId)
     },
 
     requestBookingCancellation: (bookingId: string, reason: string) => {
+      const booking = mockBookings.find((b) => b.id === bookingId)
+      if (booking && globalShowNotification) {
+        globalShowNotification({
+          type: "warning",
+          title: "Cancellation Requested",
+          message: `Cancellation request sent for "${booking.offer.title}"`,
+          actionUrl: "/calendar",
+        })
+      }
       console.log("Cancellation requested for booking:", bookingId, "reason:", reason)
     },
 
     editBooking: (bookingId: string, updates: { guestCount?: number; specialRequests?: string }) => {
+      const booking = mockBookings.find((b) => b.id === bookingId)
+      if (booking && globalShowNotification) {
+        globalShowNotification({
+          type: "info",
+          title: "Booking Updated",
+          message: `Your booking for "${booking.offer.title}" has been updated`,
+          actionUrl: "/calendar",
+        })
+      }
       console.log("Edited booking:", bookingId, updates)
     },
   }

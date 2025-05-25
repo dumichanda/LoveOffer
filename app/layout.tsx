@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
+import { NotificationProvider } from "@/lib/notification-context"
 import { Toaster } from "@/components/ui/toaster"
 import { CriticalErrorBoundary } from "@/components/error-boundary"
 
@@ -26,8 +27,10 @@ export default function RootLayout({
         <CriticalErrorBoundary>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>
-              {children}
-              <Toaster />
+              <NotificationProvider>
+                {children}
+                <Toaster />
+              </NotificationProvider>
             </AuthProvider>
           </ThemeProvider>
         </CriticalErrorBoundary>
