@@ -11,6 +11,7 @@ import AnalyticsDashboard from "@/components/admin/analytics-dashboard"
 import { PlatformSettings } from "@/components/admin/platform-settings"
 import { PaymentSettings } from "@/components/admin/payment-settings"
 import { NotificationSettings } from "@/components/admin/notification-settings"
+import { AdminLogin } from "@/components/admin-login"
 
 const adminTabs = ["Overview", "Analytics", "Users", "Offers", "Bookings", "Settings"]
 
@@ -39,19 +40,20 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("Overview")
   const [activeSettingsTab, setActiveSettingsTab] = useState("overview")
 
-  // Mock current user
-  const currentUser = { isAdmin: true, name: "Admin User" }
+  // Mock current user - for demo purposes, we'll simulate an admin user
+  const currentUser = {
+    isAdmin: true,
+    name: "Admin User",
+    email: "admin@datecraft.com",
+    id: "admin_1",
+  }
 
-  if (!currentUser?.isAdmin) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-900">
-        <Card className="p-8 text-center bg-white dark:bg-gray-800 dark:text-white">
-          <h2 className="text-xl font-bold mb-4">Access Denied</h2>
-          <p className="text-gray-600 mb-4 dark:text-gray-400">You don't have admin privileges.</p>
-          <Button onClick={() => window.history.back()}>Go Back</Button>
-        </Card>
-      </div>
-    )
+  // Add state for authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  // Add this before the return statement
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={() => setIsAuthenticated(true)} />
   }
 
   const stats = [
@@ -75,8 +77,14 @@ export default function AdminPage() {
       {/* Header */}
       <div className="bg-white border-b px-4 py-3 flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
         <h1 className="text-xl font-bold">Admin Dashboard</h1>
-        <div className="relative">
-          <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, Admin User</span>
+          <Button variant="outline" size="sm" onClick={() => setIsAuthenticated(false)}>
+            Logout
+          </Button>
+          <div className="relative">
+            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </div>
         </div>
       </div>
 
@@ -448,7 +456,7 @@ export default function AdminPage() {
                     <select className="px-3 py-2 border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                       <option value="">All Status</option>
                       <option value="active">Active</option>
-                      <option value="pending">Pending Review</option>
+                      <option value="pending Review">Pending Review</option>
                       <option value="suspended">Suspended</option>
                       <option value="featured">Featured</option>
                     </select>
