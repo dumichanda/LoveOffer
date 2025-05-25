@@ -16,10 +16,3 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export { prisma }
-
-// Ensure graceful shutdown
-if (process.env.NODE_ENV === "production") {
-  process.on("beforeExit", async () => {
-    await prisma.$disconnect()
-  })
-}
