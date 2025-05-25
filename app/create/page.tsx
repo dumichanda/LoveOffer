@@ -209,7 +209,7 @@ export default function CreateOfferPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-6">
+      <form onSubmit={handleSubmit} className="p-4 space-y-6 pb-32">
         {/* General Error Alert */}
         {getFieldError("general") && (
           <Alert variant="destructive">
@@ -505,13 +505,15 @@ export default function CreateOfferPage() {
         </div>
 
         {/* Create Button */}
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-red-500 hover:bg-red-600 rounded-full py-6 text-lg font-semibold disabled:opacity-50"
-        >
-          {isSubmitting ? "Creating Offer..." : "Create Offer"}
-        </Button>
+        <div className="sticky bottom-20 bg-gray-50 dark:bg-gray-900 pt-4 pb-4 -mx-4 px-4">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-red-500 hover:bg-red-600 text-white rounded-full py-6 text-lg font-semibold disabled:opacity-50 shadow-lg"
+          >
+            {isSubmitting ? "Creating Offer..." : "Create Offer"}
+          </Button>
+        </div>
       </form>
 
       <BottomNav currentPage="create" />
