@@ -15,86 +15,21 @@ import { useRouter } from "next/navigation"
 import { NotificationCenter } from "@/components/notification-center"
 import { signIn, useSession } from "next-auth/react"
 
-// Mock data for demonstration
-const mockOffers = [
-  {
-    id: "1",
-    title: "Sunset Picnic at Table Mountain",
-    description: "Romantic picnic with stunning city views and gourmet basket included",
-    price: 450,
-    location: "Cape Town",
-    category: "Romantic",
-    status: "Available",
-    images: ["/placeholder.svg?height=500&width=400&query=sunset+picnic+table+mountain"],
-    host: {
-      name: "Sarah Wilson",
-      image: "/placeholder.svg?height=40&width=40&query=woman+profile",
-      isVerified: true,
-      rating: 4.8,
-    },
-    maxGuests: 2,
-    tags: ["Romantic", "Outdoor", "Sunset"],
-    timeSlots: [
-      {
-        date: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        startTime: "18:00",
-        endTime: "21:00",
-        isBooked: false,
-      },
-    ],
-    analytics: {
-      totalViews: 156,
-    },
-    _count: {
-      favorites: 23,
-      reviews: 12,
-    },
-  },
-  {
-    id: "2",
-    title: "Wine Tasting in Stellenbosch",
-    description: "Private wine tasting experience at award-winning vineyard",
-    price: 680,
-    location: "Stellenbosch",
-    category: "Experience",
-    status: "Available",
-    images: ["/placeholder.svg?height=500&width=400&query=wine+tasting+stellenbosch"],
-    host: {
-      name: "Michael Chen",
-      image: "/placeholder.svg?height=40&width=40&query=man+profile",
-      isVerified: true,
-      rating: 4.9,
-    },
-    maxGuests: 4,
-    tags: ["Wine", "Luxury", "Vineyard"],
-    timeSlots: [
-      {
-        date: new Date(Date.now() + 48 * 60 * 60 * 1000),
-        startTime: "14:00",
-        endTime: "17:00",
-        isBooked: false,
-      },
-    ],
-    analytics: {
-      totalViews: 89,
-    },
-    _count: {
-      favorites: 18,
-      reviews: 8,
-    },
-  },
-]
+// Remove the hardcoded mockOffers array and import the store
+import { useAppStore } from "@/lib/store"
 
+// In the component, get offers from the store instead of hardcoded data
 export default function HomePage() {
   const router = useRouter()
   const { data: session } = useSession()
+  const { offers } = useAppStore() // Get offers from store
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0)
   const [browseWithoutAccount, setBrowseWithoutAccount] = useState(false)
   const [favorites, setFavorites] = useState<string[]>([])
 
-  const currentOffer = mockOffers[currentOfferIndex]
+  const currentOffer = offers[currentOfferIndex] // Use store offers
 
   useEffect(() => {
     // Check if user chose to browse without account from URL params or localStorage
@@ -109,6 +44,7 @@ export default function HomePage() {
     }
   }, [])
 
+  // Update the handleSwipe function to work with store offers length
   const handleSwipe = (action: "like" | "pass") => {
     if (!currentOffer) return
 
@@ -117,7 +53,7 @@ export default function HomePage() {
     }
 
     // Move to next offer or loop back
-    if (currentOfferIndex >= mockOffers.length - 1) {
+    if (currentOfferIndex >= offers.length - 1) {
       setCurrentOfferIndex(0)
     } else {
       setCurrentOfferIndex((prev) => prev + 1)
@@ -279,21 +215,21 @@ export default function HomePage() {
           {/* Image */}
           <div
             className="h-[500px] bg-cover bg-center relative"
-            style={{ backgroundImage: `url(${currentOffer.images[0] || "/placeholder.svg?height=500&width=400"})` }}
+            style={{ backgroundImage: `url(${currentOffer?.images[0] || "/placeholder.svg?height=500&width=400"})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
             {/* Top Badges */}
             <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
               <div className="flex flex-col gap-2">
-                <Badge className="bg-purple-500 text-white text-sm px-2 py-1 w-fit">{currentOffer.category}</Badge>
-                {currentOffer.host.isVerified && (
+                <Badge className="bg-purple-500 text-white text-sm px-2 py-1 w-fit">{currentOffer?.category}</Badge>
+                {currentOffer?.host.isVerified && (
                   <Badge className="bg-green-500 text-white text-sm px-2 py-1 w-fit">✓ Verified Host</Badge>
                 )}
               </div>
               <div className="flex flex-col gap-2 items-end">
-                <Badge className="bg-red-500 text-white text-lg px-3 py-1">R{currentOffer.price}</Badge>
-                <Badge className="bg-green-500 text-white text-sm px-2 py-1">{currentOffer.status}</Badge>
+                <Badge className="bg-red-500 text-white text-lg px-3 py-1">R{currentOffer?.price}</Badge>
+                <Badge className="bg-green-500 text-white text-sm px-2 py-1">{currentOffer?.status}</Badge>
                 <Button
                   variant="ghost"
                   size="lg"
@@ -319,22 +255,22 @@ export default function HomePage() {
             {/* Content Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-2xl font-bold">{currentOffer.title}</h2>
-                {currentOffer.host.rating > 0 && (
+                <h2 className="text-2xl font-bold">{currentOffer?.title}</h2>
+                {currentOffer?.host.rating > 0 && (
                   <div className="flex items-center gap-1">
                     <span className="text-yellow-400">⭐</span>
-                    <span className="text-base font-bold">{currentOffer.host.rating}</span>
+                    <span className="text-base font-bold">{currentOffer?.host.rating}</span>
                   </div>
                 )}
               </div>
 
               <div className="flex items-center gap-2 mb-3">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={currentOffer.host.image || ""} />
-                  <AvatarFallback className="text-sm">{currentOffer.host.name?.[0] || "H"}</AvatarFallback>
+                  <AvatarImage src={currentOffer?.host.image || ""} />
+                  <AvatarFallback className="text-sm">{currentOffer?.host.name?.[0] || "H"}</AvatarFallback>
                 </Avatar>
-                <span className="text-base">by {currentOffer.host.name}</span>
-                {currentOffer.host.isVerified && (
+                <span className="text-base">by {currentOffer?.host.name}</span>
+                {currentOffer?.host.isVerified && (
                   <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs">✓</span>
                   </div>
@@ -342,13 +278,13 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-base">📍 {currentOffer.location}</span>
+                <span className="text-base">📍 {currentOffer?.location}</span>
               </div>
 
               <div className="flex items-center gap-4 mb-3 text-sm">
                 <div>
                   <span>
-                    Max {currentOffer.maxGuests} guest{currentOffer.maxGuests > 1 ? "s" : ""}
+                    Max {currentOffer?.maxGuests} guest{currentOffer?.maxGuests > 1 ? "s" : ""}
                   </span>
                 </div>
               </div>
@@ -359,11 +295,11 @@ export default function HomePage() {
                 </div>
               )}
 
-              <p className="text-white/90 text-sm mb-4">{currentOffer.description}</p>
+              <p className="text-white/90 text-sm mb-4">{currentOffer?.description}</p>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1">
-                {currentOffer.tags.slice(0, 3).map((tag) => (
+                {currentOffer?.tags.slice(0, 3).map((tag) => (
                   <Badge key={tag} variant="secondary" className="bg-white/20 text-white text-xs">
                     {tag}
                   </Badge>
