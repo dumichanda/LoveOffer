@@ -32,6 +32,11 @@ function isRateLimited(key: string, limit: number, windowMs: number): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip middleware for admin routes
+  if (pathname.startsWith("/admin")) {
+    return NextResponse.next()
+  }
+
   // Security headers for all requests
   const response = NextResponse.next()
 
@@ -119,7 +124,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - admin (admin routes)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public/|admin).*)",
   ],
 }

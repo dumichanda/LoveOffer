@@ -7,19 +7,23 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface AdminLoginProps {
-  onLogin: () => void
+  onLogin: (credentials: { email: string; password: string }) => Promise<void>
 }
 
 export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [credentials, setCredentials] = useState({ email: "", password: "" })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Simple mock authentication
-    if (credentials.email === "admin@datecraft.com" && credentials.password === "admin123") {
-      onLogin()
-    } else {
-      alert("Invalid credentials. Use admin@datecraft.com / admin123")
+    setIsLoading(true)
+
+    try {
+      await onLogin(credentials)
+    } catch (error) {
+      console.error("Login failed:", error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -57,8 +61,8 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Login to Admin Dashboard
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login to Admin Dashboard"}
             </Button>
           </form>
 

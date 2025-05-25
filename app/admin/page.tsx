@@ -12,6 +12,7 @@ import { PlatformSettings } from "@/components/admin/platform-settings"
 import { PaymentSettings } from "@/components/admin/payment-settings"
 import { NotificationSettings } from "@/components/admin/notification-settings"
 import { AdminLogin } from "@/components/admin-login"
+import { useAdmin } from "@/lib/admin-context"
 
 const adminTabs = ["Overview", "Analytics", "Users", "Offers", "Bookings", "Settings"]
 
@@ -39,6 +40,7 @@ const mockBookings = [
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("Overview")
   const [activeSettingsTab, setActiveSettingsTab] = useState("overview")
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Mock current user - for demo purposes, we'll simulate an admin user
   const currentUser = {
@@ -49,11 +51,22 @@ export default function AdminPage() {
   }
 
   // Add state for authentication
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { admin, login, logout } = useAdmin()
 
   // Add this before the return statement
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+    return (
+      <AdminLogin
+        onLogin={async (credentials) => {
+          const success = await login(credentials)
+          if (!success) {
+            alert("Invalid credentials. Use admin@datecraft.com / admin123")
+          } else {
+            setIsAuthenticated(true)
+          }
+        }}
+      />
+    )
   }
 
   const stats = [
@@ -72,14 +85,24 @@ export default function AdminPage() {
     { id: "integrations", label: "Integrations", description: "Third-party integrations" },
   ]
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" })
+      setIsAuthenticated(false)
+    } catch (error) {
+      console.error("Logout failed:", error)
+      setIsAuthenticated(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="bg-white border-b px-4 py-3 flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
         <h1 className="text-xl font-bold">Admin Dashboard</h1>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, Admin User</span>
-          <Button variant="outline" size="sm" onClick={() => setIsAuthenticated(false)}>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, {admin?.name || "Admin User"}</span>
+          <Button variant="outline" size="sm" onClick={logout}>
             Logout
           </Button>
           <div className="relative">
