@@ -5,50 +5,55 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDateTime(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date
-  return new Intl.DateTimeFormat("en-ZA", {
-    timeZone: "Africa/Johannesburg",
-    year: "numeric",
+export function formatDateTime(date: string | Date, startTime: string, endTime: string): string {
+  const dateObj = new Date(date)
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    day: "numeric",
     month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(dateObj)
+    timeZone: "Africa/Johannesburg",
+  }
+
+  return `${dateObj.toLocaleDateString("en-ZA", options)}, ${startTime}-${endTime}`
 }
 
-export function formatDate(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date
-  return new Intl.DateTimeFormat("en-ZA", {
-    timeZone: "Africa/Johannesburg",
+export function formatDate(date: string | Date): string {
+  const dateObj = new Date(date)
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
     year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(dateObj)
-}
-
-export function formatTime(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date
-  return new Intl.DateTimeFormat("en-ZA", {
     timeZone: "Africa/Johannesburg",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(dateObj)
+  }
+
+  return dateObj.toLocaleDateString("en-ZA", options)
 }
 
-export function getTimeAgo(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date
+export function formatTime(time: string): string {
+  return time
+}
+
+export function getTimeAgo(date: string | Date): string {
   const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000)
+  const past = new Date(date)
+  const diffMs = now.getTime() - past.getTime()
 
-  if (diffInSeconds < 60) return "just now"
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
+  const diffSecs = Math.floor(diffMs / 1000)
+  const diffMins = Math.floor(diffSecs / 60)
+  const diffHours = Math.floor(diffMins / 60)
+  const diffDays = Math.floor(diffHours / 24)
 
-  return formatDate(dateObj)
+  if (diffDays > 0) {
+    return `${diffDays}d ago`
+  } else if (diffHours > 0) {
+    return `${diffHours}h ago`
+  } else if (diffMins > 0) {
+    return `${diffMins}m ago`
+  } else {
+    return "just now"
+  }
 }
 
 export function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36)
+  return Math.random().toString(36).substring(2, 10)
 }
