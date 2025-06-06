@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -34,7 +35,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# IDE
+.vscode
+.idea
+
+# OS
+Thumbs.db

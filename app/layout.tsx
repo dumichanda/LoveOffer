@@ -1,8 +1,7 @@
 import type React from "react"
 import "./globals.css"
-import type { Metadata } from "next"
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "DateCraft - Unique Dating Experiences",
   description: "Discover unique dating experiences in South Africa",
     generator: 'v0.dev'
@@ -15,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body>{children}</body>
     </html>
   )
 }
