@@ -1,27 +1,27 @@
-import { cn } from "@/lib/utils"
-
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1
-            className={cn(
-              "text-4xl md:text-6xl font-bold text-gray-900 mb-6",
-              "bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent",
-            )}
-          >
-            Welcome to DateCraft
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Connect with amazing people and create memorable experiences in South Africa
-          </p>
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">🚀 Deployment Successful!</h2>
-              <p className="text-gray-600">DateCraft is now live and ready for development.</p>
-            </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
+        <h1 className="text-4xl font-bold text-center mb-8">Welcome to DateCraft</h1>
+        <p className="text-center text-lg text-gray-600 mb-8">Your premium dating platform for South Africa</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="p-6 border rounded-lg">
+            <h2 className="text-xl font-semibold mb-2">Find Your Match</h2>
+            <p className="text-gray-600">Connect with like-minded people in your area</p>
           </div>
+          <div className="p-6 border rounded-lg">
+            <h2 className="text-xl font-semibold mb-2">Safe & Secure</h2>
+            <p className="text-gray-600">Your privacy and safety are our top priority</p>
+          </div>
+          <div className="p-6 border rounded-lg">
+            <h2 className="text-xl font-semibold mb-2">Local Focus</h2>
+            <p className="text-gray-600">Built specifically for South African singles</p>
+          </div>
+        </div>
+        <div className="text-center mt-8">
+          <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+            Get Started
+          </button>
         </div>
       </div>
     </main>
