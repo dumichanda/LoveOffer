@@ -1,53 +1,51 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { format, formatDistanceToNowStrict } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDateTime(date: Date | string): string {
-  const d = new Date(date)
-  return d.toLocaleString("en-ZA", {
-    timeZone: "Africa/Johannesburg",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+export function formatDateTime(date: string | number | Date): string {
+  try {
+    return format(new Date(date), "MMMM d, yyyy 'at' h:mm a")
+  } catch (error) {
+    console.error("Error formatting date time:", error)
+    return "Invalid Date"
+  }
 }
 
-export function formatDate(date: Date | string): string {
-  const d = new Date(date)
-  return d.toLocaleDateString("en-ZA", {
-    timeZone: "Africa/Johannesburg",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+export function formatDate(date: string | number | Date): string {
+  try {
+    return format(new Date(date), "MMMM d, yyyy")
+  } catch (error) {
+    console.error("Error formatting date:", error)
+    return "Invalid Date"
+  }
 }
 
-export function formatTime(date: Date | string): string {
-  const d = new Date(date)
-  return d.toLocaleTimeString("en-ZA", {
-    timeZone: "Africa/Johannesburg",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+export function formatTime(date: string | number | Date): string {
+  try {
+    return format(new Date(date), "h:mm a")
+  } catch (error) {
+    console.error("Error formatting time:", error)
+    return "Invalid Time"
+  }
 }
 
-export function getTimeAgo(date: Date | string): string {
-  const now = new Date()
-  const past = new Date(date)
-  const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000)
-
-  if (diffInSeconds < 60) return "just now"
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
-  return formatDate(date)
+export function getTimeAgo(date: string | number | Date): string {
+  try {
+    return formatDistanceToNowStrict(new Date(date), { addSuffix: true })
+  } catch (error) {
+    console.error("Error getting time ago:", error)
+    return "Invalid Date"
+  }
 }
 
-export function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36)
+export function generateId(prefix = "id"): string {
+  return `${prefix}_${Math.random().toString(36).substr(2, 9)}`
 }
+
+// Keep any other existing exports in this file if there are any.
+// For example, if there was a logger function:
+// export const logger = (message: string) => console.log(message);
