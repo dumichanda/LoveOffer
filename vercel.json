@@ -1,6 +1,6 @@
 {
-  "buildCommand": "node scripts/fix-links.js && npm install --no-package-lock && npx prisma generate && npx prisma migrate deploy && npm run db:seed:prod && next build",
-  "installCommand": "npm install --no-package-lock",
+  "buildCommand": "rm -rf node_modules package-lock.json yarn.lock pnpm-lock.yaml .next && npm cache clean --force && npm install && next build",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["cpt1"],
   "functions": {

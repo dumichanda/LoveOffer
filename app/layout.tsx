@@ -2,17 +2,12 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/components/auth-provider"
-import { NotificationProvider } from "@/lib/notification-context"
-import { Toaster } from "@/components/ui/toaster"
-import { CriticalErrorBoundary } from "@/components/error-boundary"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Mavuso - Unique Dating Experiences",
-  description: "Discover unique dating experiences in South Africa",
+  title: "DateCraft - Find Your Perfect Date",
+  description: "Connect with amazing people and create memorable experiences",
     generator: 'v0.dev'
 }
 
@@ -22,19 +17,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <CriticalErrorBoundary>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <AuthProvider>
-              <NotificationProvider>
-                {children}
-                <Toaster />
-              </NotificationProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </CriticalErrorBoundary>
-      </body>
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
