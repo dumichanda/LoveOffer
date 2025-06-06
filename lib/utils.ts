@@ -5,21 +5,27 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDateTime(date: Date | string): string {
+export function formatDateTime(
+  date: Date | string,
+  startTime?: string,
+  endTime?: string,
+): string {
   const d = new Date(date)
-  return d.toLocaleString("en-ZA", {
+  const base = d.toLocaleDateString("en-US", {
     timeZone: "Africa/Johannesburg",
     year: "numeric",
     month: "short",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   })
+
+  if (startTime && endTime) return `${base} at ${startTime} - ${endTime}`
+  if (startTime) return `${base} at ${startTime}`
+  return base
 }
 
 export function formatDate(date: Date | string): string {
   const d = new Date(date)
-  return d.toLocaleDateString("en-ZA", {
+  return d.toLocaleDateString("en-US", {
     timeZone: "Africa/Johannesburg",
     year: "numeric",
     month: "long",
@@ -28,11 +34,15 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatTime(date: Date | string): string {
+  if (typeof date === "string") {
+    return date
+  }
   const d = new Date(date)
-  return d.toLocaleTimeString("en-ZA", {
+  return d.toLocaleTimeString("en-US", {
     timeZone: "Africa/Johannesburg",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   })
 }
 
@@ -48,6 +58,6 @@ export function getTimeAgo(date: Date | string): string {
   return formatDate(date)
 }
 
-export function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36)
+export function generateId(prefix: string): string {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`
 }

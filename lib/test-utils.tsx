@@ -4,7 +4,6 @@ import { render, type RenderOptions } from "@testing-library/react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "next-auth/react"
 import { Toaster } from "@/components/ui/toaster"
-import { expect } from "vitest"
 
 // Mock session for testing
 const mockSession = {
