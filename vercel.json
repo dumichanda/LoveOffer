@@ -1,5 +1,5 @@
 {
-  "buildCommand": "find . -name 'package.json' -not -path './node_modules/*' -exec sed -i 's/\"link:[^\"]*\"/\"latest\"/g' {} + && rm -rf node_modules package-lock.json yarn.lock .next && pnpm install && next build",
+  "buildCommand": "prisma generate && pnpm run build",
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "regions": ["cpt1"],
@@ -9,7 +9,8 @@
     }
   },
   "env": {
-    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true",
-    "SEED_DATABASE": "true"
+    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true", // This might be redundant if prisma generate is explicit, but harmless
+    "SEED_DATABASE": "true",
+    "SKIP_ENV_VALIDATION": "1" // Added as per your suggestion
   }
 }
