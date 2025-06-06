@@ -149,7 +149,8 @@ model Offer {
   @@index([viewCount])
   @@index([category, location])
   @@index([price, category])
-  @@fulltext([title, description])
+  @@index([title])
+  @@index([description])
   @@map("offers")
 }
 
