@@ -1,6 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BottomNav } from "@/components/bottom-nav"
 
 export default function HomePage() {
   const [showWelcome, setShowWelcome] = useState(true)
@@ -8,12 +13,14 @@ export default function HomePage() {
   if (showWelcome) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
-        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-          <div className="text-center space-y-6">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center text-3xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
               DateCraft
-            </h1>
-            <p className="text-lg text-gray-600">Discover unique dating experiences in South Africa</p>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-lg text-gray-600 text-center">Discover unique dating experiences in South Africa</p>
 
             <div className="grid grid-cols-2 gap-4 text-center">
               <div className="space-y-2">
@@ -27,35 +34,33 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-3">
-              <button
-                onClick={() => setShowWelcome(false)}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors"
-              >
+              <Button onClick={() => setShowWelcome(false)} className="w-full">
                 Get Started
-              </button>
-              <button className="w-full border border-gray-300 bg-transparent py-3 px-4 rounded-md hover:bg-gray-100 transition-colors">
+              </Button>
+              <Button variant="outline" className="w-full">
                 Learn More
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h1 className="text-xl font-bold">DateCraft</h1>
-        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-          <span className="text-sm font-medium">U</span>
-        </div>
+        <Avatar className="w-8 h-8">
+          <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
+          <AvatarFallback>U</AvatarFallback>
+        </Avatar>
       </div>
 
       {/* Main Content */}
       <div className="p-3">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden w-full cursor-pointer">
+        <Card className="relative overflow-hidden w-full cursor-pointer">
           <div className="h-[400px] bg-gradient-to-br from-blue-400 to-purple-500 relative">
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -70,9 +75,9 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium">H</span>
-                </div>
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback>H</AvatarFallback>
+                </Avatar>
                 <span className="text-base">by John Host</span>
               </div>
 
@@ -86,78 +91,32 @@ export default function HomePage() {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1">
-                <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">Coffee</span>
-                <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">Casual</span>
-                <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">Outdoor</span>
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/20">
+                  Coffee
+                </Badge>
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/20">
+                  Casual
+                </Badge>
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/20">
+                  Outdoor
+                </Badge>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="p-6 flex justify-center gap-8 bg-white">
-            <button className="w-16 h-16 rounded-full border-2 border-gray-300 flex items-center justify-center text-2xl hover:bg-gray-50 transition-colors">
+          <CardContent className="flex justify-center gap-8 bg-white">
+            <Button variant="outline" size="icon" className="w-16 h-16 rounded-full border-2">
               ✕
-            </button>
-            <button className="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center text-2xl hover:bg-red-600 transition-colors">
+            </Button>
+            <Button size="icon" className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600">
               ❤️
-            </button>
-          </div>
-        </div>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 flex justify-around">
-        <div className="flex flex-col items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-          <span className="text-xs mt-1">Home</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
-          <span className="text-xs mt-1">Chats</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="8" r="5"></circle>
-            <path d="M20 21a8 8 0 1 0-16 0"></path>
-          </svg>
-          <span className="text-xs mt-1">Profile</span>
-        </div>
-      </div>
+      <BottomNav />
     </div>
   )
 }
