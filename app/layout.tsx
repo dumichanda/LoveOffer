@@ -1,13 +1,10 @@
 import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
-
-const inter = Inter({ subsets: ["latin"] })
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "DateCraft - Unique Dating Experiences",
-  description: "Discover unique dating experiences in South Africa",
+  title: "DateCraft",
+  description: "A modern dating application",
     generator: 'v0.dev'
 }
 
@@ -18,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   )
 }

@@ -1,49 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/bottom-nav"
 
-export default function HomePage() {
+export default function Home() {
   const [showWelcome, setShowWelcome] = useState(true)
 
   if (showWelcome) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-3xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-              DateCraft
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-lg text-gray-600 text-center">Discover unique dating experiences in South Africa</p>
-
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="space-y-2">
-                <div className="mx-auto h-8 w-8 text-pink-500 text-2xl">❤️</div>
-                <p className="text-sm font-medium">Unique Dates</p>
-              </div>
-              <div className="space-y-2">
-                <div className="mx-auto h-8 w-8 text-purple-500 text-2xl">🔍</div>
-                <p className="text-sm font-medium">Local Hosts</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Button onClick={() => setShowWelcome(false)} className="w-full">
-                Get Started
-              </Button>
-              <Button variant="outline" className="w-full">
-                Learn More
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-pink-50 to-purple-100">
+        <div className="w-full max-w-md p-6 bg-white rounded-xl shadow-lg">
+          <h1 className="text-3xl font-bold text-center text-pink-600 mb-6">DateCraft</h1>
+          <p className="text-gray-600 text-center mb-8">Welcome to DateCraft - Your dating app is being set up.</p>
+          <div className="flex justify-center">
+            <button
+              className="px-6 py-2 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition-colors"
+              onClick={() => setShowWelcome(false)}
+            >
+              Get Started
+            </button>
+          </div>
+        </div>
+      </main>
     )
   }
 
