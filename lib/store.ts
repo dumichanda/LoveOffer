@@ -1157,6 +1157,42 @@ const mockOffers: Offer[] = [
   },
 ]
 
+// Current mock data structure (what we need to replicate in database)
+const mockOffersData = [
+  {
+    id: "1",
+    title: "Coffee & Art Gallery Tour",
+    description: "Let's explore the local art scene over great coffee",
+    price: 150,
+    duration: 120,
+    location: "V&A Waterfront, Cape Town",
+    category: "Coffee",
+    images: ["/placeholder.svg?height=300&width=400"],
+    userId: "user1",
+    availableSlots: [
+      /* dates */
+    ],
+    // ... more fields
+  },
+  // ... more offers
+]
+
+const mockUsersData = [
+  {
+    id: "user1",
+    name: "John Doe",
+    email: "john@example.com",
+    image: "/placeholder.svg?height=100&width=100",
+    bio: "Adventure seeker and coffee enthusiast",
+    age: 28,
+    location: "Cape Town, South Africa",
+    verified: true,
+    rating: 4.8,
+    totalRatings: 15,
+  },
+  // ... more users
+]
+
 // Enhanced messages with proper relationships
 const mockMessages: Message[] = [
   // Guest booking chats (user attending others' offers)

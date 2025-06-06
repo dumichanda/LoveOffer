@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npx prisma generate && npx prisma migrate deploy && npm run db:seed:conditional && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["cpt1"],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true",
+    "SEED_DATABASE": "true"
+  }
+}

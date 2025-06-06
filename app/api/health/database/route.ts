@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
-    // Only check database if Prisma client is available
-    const { prisma } = await import("@/lib/prisma")
+    // Test database connection
     await prisma.$connect()
+
+    // Check if tables exist by querying a simple table
+    const userCount = await prisma.user.count()
+
     await prisma.$disconnect()
 
     return NextResponse.json({
-      status: "healthy",
-      database: "connected",
+      success: true,
+      status: "connected",
+      userCount,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
@@ -17,9 +22,9 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        status: "unhealthy",
-        database: "disconnected",
-        error: error instanceof Error ? error.message : "Database connection failed",
+        success: false,
+        status: "disconnected",
+        error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
       { status: 500 },

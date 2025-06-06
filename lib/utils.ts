@@ -5,13 +5,44 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function formatDateTime(date: Date | string): string {
+  const d = new Date(date)
+  return d.toLocaleString("en-ZA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Africa/Johannesburg",
+  })
+}
+
+export function formatDate(date: Date | string): string {
+  const d = new Date(date)
+  return d.toLocaleDateString("en-ZA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "Africa/Johannesburg",
+  })
+}
+
+export function formatTime(date: Date | string): string {
+  const d = new Date(date)
+  return d.toLocaleTimeString("en-ZA", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Africa/Johannesburg",
+  })
+}
+
 export function getTimeAgo(date: Date | string): string {
   const now = new Date()
   const past = new Date(date)
   const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000)
 
   if (diffInSeconds < 60) {
-    return "just now"
+    return "Just now"
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60)
@@ -43,41 +74,6 @@ export function getTimeAgo(date: Date | string): string {
   return `${diffInYears}y ago`
 }
 
-export function formatDate(date: string | Date): string {
-  const d = new Date(date)
-  return d.toLocaleDateString("en-ZA", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
-export function formatTime(time: string): string {
-  // If time is already formatted, return as is
-  if (time.includes(":")) {
-    return time
-  }
-  // Otherwise format as needed
-  return time
-}
-
-export function formatDateTime(date: string | Date, startTime?: string, endTime?: string): string {
-  const d = new Date(date)
-  const formattedDate = d.toLocaleDateString("en-ZA", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-
-  if (startTime && endTime) {
-    return `${formattedDate} at ${startTime} - ${endTime}`
-  } else if (startTime) {
-    return `${formattedDate} at ${startTime}`
-  } else {
-    return formattedDate
-  }
-}
-
-export function generateId(prefix: string): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+export function generateId(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36)
 }
