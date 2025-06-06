@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 
 export default function HomePage() {
   const [showWelcome, setShowWelcome] = useState(true)
@@ -111,10 +112,10 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+      {/* Bottom Navigation - Fixed with proper Links */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
         <div className="flex justify-around items-center max-w-md mx-auto">
-          <button className="flex flex-col items-center p-2 text-pink-600">
+          <Link href="/" className="flex flex-col items-center p-2 text-pink-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -124,16 +125,16 @@ export default function HomePage() {
               />
             </svg>
             <span className="text-xs mt-1">Home</span>
-          </button>
+          </Link>
 
-          <button className="flex flex-col items-center p-2 text-gray-400">
+          <Link href="/create" className="flex flex-col items-center p-2 text-gray-400 hover:text-gray-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             <span className="text-xs mt-1">Create</span>
-          </button>
+          </Link>
 
-          <button className="flex flex-col items-center p-2 text-gray-400">
+          <Link href="/chats" className="flex flex-col items-center p-2 text-gray-400 hover:text-gray-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -143,9 +144,9 @@ export default function HomePage() {
               />
             </svg>
             <span className="text-xs mt-1">Chats</span>
-          </button>
+          </Link>
 
-          <button className="flex flex-col items-center p-2 text-gray-400">
+          <Link href="/calendar" className="flex flex-col items-center p-2 text-gray-400 hover:text-gray-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -155,9 +156,9 @@ export default function HomePage() {
               />
             </svg>
             <span className="text-xs mt-1">Calendar</span>
-          </button>
+          </Link>
 
-          <button className="flex flex-col items-center p-2 text-gray-400">
+          <Link href="/profile" className="flex flex-col items-center p-2 text-gray-400 hover:text-gray-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -167,7 +168,7 @@ export default function HomePage() {
               />
             </svg>
             <span className="text-xs mt-1">Profile</span>
-          </button>
+          </Link>
         </div>
       </nav>
     </div>
