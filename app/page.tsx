@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 
-export default function Home() {
+export default function HomePage() {
   const [showWelcome, setShowWelcome] = useState(true)
 
   if (showWelcome) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-pink-50 to-purple-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
         <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border">
           <div className="text-center space-y-6">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
@@ -39,7 +39,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     )
   }
 
@@ -82,8 +82,7 @@ export default function Home() {
               </div>
 
               <p className="text-white/90 text-sm mb-4 leading-relaxed">
-                Enjoy a relaxed coffee date at one of Cape Town's most scenic cafes with stunning ocean views and
-                artisanal coffee.
+                Enjoy a relaxed coffee date at one of Cape Town's most scenic cafes with stunning ocean views.
               </p>
 
               {/* Tags */}
