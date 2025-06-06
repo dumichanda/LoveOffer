@@ -1,7 +1,7 @@
 {
-  "buildCommand": "prisma generate && pnpm run build",
-  "installCommand": "pnpm install",
   "framework": "nextjs",
+  "buildCommand": "prisma generate && pnpm run build", // Correct: runs prisma generate, then your package.json build script
+  "installCommand": "pnpm install",
   "regions": ["cpt1"],
   "functions": {
     "app/api/**/*.ts": {
@@ -9,8 +9,9 @@
     }
   },
   "env": {
-    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true", // This might be redundant if prisma generate is explicit, but harmless
-    "SEED_DATABASE": "true",
-    "SKIP_ENV_VALIDATION": "1" // Added as per your suggestion
+    "DATABASE_URL": "your_actual_database_url_from_vercel_env_vars", // Make sure this is set in Vercel
+    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true", // Optional, but good practice
+    "SEED_DATABASE": "true", // If you use this
+    "SKIP_ENV_VALIDATION": "1" // Helpful for Vercel builds
   }
 }
