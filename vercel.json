@@ -1,5 +1,5 @@
 {
-  "buildCommand": "rm -rf node_modules package-lock.json yarn.lock pnpm-lock.yaml .next && npm cache clean --force && npm install && next build",
+  "buildCommand": "find . -name 'package.json' -not -path './node_modules/*' -exec sed -i 's/\"link:[^\"]*\"/\"latest\"/g' {} + && rm -rf node_modules package-lock.json yarn.lock pnpm-lock.yaml .next && npm cache clean --force && npm install && next build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["cpt1"],
